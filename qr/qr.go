@@ -76,7 +76,7 @@ const (
 	byteByByte
 )
 
-// Длина поля количества данных
+// lengthFieldData(version int, kind kindEncode) Длина поля количества данных
 func lengthFieldData(version int, kind kindEncode) int {
 	switch kind {
 	case digital:
@@ -107,6 +107,7 @@ func lengthFieldData(version int, kind kindEncode) int {
 	return 0
 }
 
+// CountOfBlocks Разделение информации на блоки
 var (
 	CountOfBlocks = map[levelCorrection][]int{
 		Low: {

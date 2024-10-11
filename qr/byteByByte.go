@@ -4,7 +4,13 @@ import (
 	"slices"
 )
 
-func fill(data []byte, level levelCorrection, kind kindEncode) []byte {
+//101110001100000
+//________ ________
+//    0100 01100100
+//<Способ кодирования><Количество данных><исходная последовательность>
+
+// Заполнение
+func fill(data []byte, level levelCorrection) []byte {
 	l := len(data)
 	bitSizeData := l * 8
 	version, _ := slices.BinarySearch(levelToCountBits[level], bitSizeData)
@@ -14,7 +20,7 @@ func fill(data []byte, level levelCorrection, kind kindEncode) []byte {
 		bitSizeFieldData = lengthFieldData(version, byteByByte)
 	}
 	res := make([]byte, levelToCountBits[level][version]/8)
-	res[0] = byte(kind << 4)
+	res[0] = byte(byteByByte << 4)
 	index := 0
 	if bitSizeFieldData == 16 {
 		res[index] |= byte(l & 0b0000_0000_0000_0000_1111_0000_0000_0000 >> 12)
@@ -41,7 +47,18 @@ func fill(data []byte, level levelCorrection, kind kindEncode) []byte {
 	return res
 }
 
-//101110001100000
-//________ ________
-//    0100 01100100
-//<Способ кодирования><Количество данных><исходная последовательность>
+// Разделение информации на блоки - Определение количество байт в каждом блоке
+func getCountByteOfBlock(level levelCorrection, version int) []int {
+	bytesData := levelToCountBits[level][version] / 8
+	byteOfBlock := bytesData / CountOfBlocks[level][version]
+	reminderByteOfBlock := bytesData % CountOfBlocks[level][version]
+	res := make([]int, CountOfBlocks[level][version])
+	index := CountOfBlocks[level][version] - 1
+	for ; reminderByteOfBlock > 0 && index >= 0; index, reminderByteOfBlock = index-1, reminderByteOfBlock-1 {
+		res[index] = byteOfBlock + 1
+	}
+	for ; index >= 0; index-- {
+		res[index] = byteOfBlock
+	}
+	return res
+}

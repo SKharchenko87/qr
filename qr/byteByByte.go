@@ -84,3 +84,28 @@ func fillBlocks(data []byte, countByteOfBlock []int) [][]byte {
 	}
 	return res
 }
+
+// createByteCorrection Создание байтов коррекции
+func createByteCorrection(level levelCorrection, version int, data *[]byte) []byte {
+	l := len(*data)
+	lengthCorrectionBytes := NumberOfCorrectionBytesPerBlock[level][version] // lengthCorrectionBytes - Количество байтов коррекции на один блок.
+	polynomials := GeneratePolynomial[lengthCorrectionBytes]                 // polynomials - Генерирующие многочлены.
+	correctionBytes := make([]byte, l+int(lengthCorrectionBytes))            // correctionBytes - Блок байтов коррекции(подготовленный массив)
+	// Копируем исходный блок данных
+	for i := 0; i < l; i++ {
+		correctionBytes[i] = (*data)[i]
+	}
+
+	// Выполняем алгоритм по количеству байт в исходном блоке данных
+	for i := 0; i < l; i++ {
+		element := correctionBytes[i] // element - обрабатываемый элемент
+		if element > 0 {
+			reverseElement := int(ReverseGaloisField[element]) // reverseElement - обратный элемент поля Галуа
+			for j := 0; j < int(lengthCorrectionBytes); j++ {
+				mask := (int(polynomials[j]) + reverseElement) % 255
+				correctionBytes[j+i+1] ^= GaloisField[mask]
+			}
+		}
+	}
+	return correctionBytes[l:]
+}

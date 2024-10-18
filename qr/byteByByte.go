@@ -10,6 +10,10 @@ import (
 //<Способ кодирования><Количество данных><исходная последовательность>
 
 // Заполнение
+// На выходе последовательность бит кратная 8 и
+// если количество бит в текущей последовательности байт меньше того,
+// которое нужно для выбранной версии, то оно дополнено чередующимися
+// байтами 11101100 и 00010001.
 func fill(data []byte, level levelCorrection) []byte {
 	l := len(data)
 	bitSizeData := l * 8
@@ -59,6 +63,24 @@ func getCountByteOfBlock(level levelCorrection, version int) []int {
 	}
 	for ; index >= 0; index-- {
 		res[index] = byteOfBlock
+	}
+	return res
+}
+
+// Заполнение блоков
+// Блок заполняется байтами из данных полностью.
+// Когда текущий блок полностью заполняется, очередь переходит к следующему.
+// Байтов данных должно хватить ровно на все блоки, ни больше и ни меньше.
+func fillBlocks(data []byte, countByteOfBlock []int) [][]byte {
+	l := len(countByteOfBlock)
+	res := make([][]byte, l)
+	index := 0
+	for cnt, i := range countByteOfBlock {
+		res[i] = make([]byte, cnt)
+		for j := 0; j < cnt; j++ {
+			res[i][j] = data[index]
+			index++
+		}
 	}
 	return res
 }

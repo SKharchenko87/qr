@@ -109,3 +109,35 @@ func createByteCorrection(level levelCorrection, version int, data *[]byte) []by
 	}
 	return correctionBytes[l:]
 }
+
+// mergeBlocks Объединение блоков
+func mergeBlocks(data, correction [][]byte) []byte {
+	lengthRes := 0
+	for i := range data {
+		lengthRes += len(data[i])
+	}
+	for i := range correction {
+		lengthRes += len(correction[i])
+	}
+	index := 0
+	res := make([]byte, lengthRes)
+	var f = func(arr *[][]byte) {
+		l0 := len((*arr)[0])
+		for j := 0; j < l0; j++ {
+			for i := range *arr {
+				res[index] = (*arr)[i][j]
+				index++
+			}
+		}
+		for i := range *arr {
+			if len((*arr)[i]) > l0 {
+				res[index] = (*arr)[i][l0]
+				index++
+			}
+		}
+	}
+	f(&data)
+	f(&correction)
+
+	return res
+}

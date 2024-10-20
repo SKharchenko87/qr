@@ -47,3 +47,24 @@ func Test_createByteCorrection(t *testing.T) {
 		})
 	}
 }
+
+func Test_mergeBlocks(t *testing.T) {
+	type args struct {
+		data       [][]byte
+		correction [][]byte
+	}
+	tests := []struct {
+		name string
+		args args
+		want []byte
+	}{
+		{"Test 1", args{[][]byte{{1, 4}, {2, 5}, {3, 6, 7}}, [][]byte{{10, 13}, {11, 14}, {12, 15, 16}}}, []byte{1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 13, 14, 15, 16}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := mergeBlocks(tt.args.data, tt.args.correction); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("mergeBlocks() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

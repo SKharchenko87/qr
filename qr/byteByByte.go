@@ -145,14 +145,6 @@ func mergeBlocks(data, correction [][]byte) []byte {
 // direction направления для рисования квадратов
 var direction = [][2]int8{{0, 1}, {1, 0}, {0, -1}, {-1, 0}}
 
-// Окрас модулей
-const (
-	Withe = false
-	Black = true
-	O     = false
-	I     = true
-)
-
 // drawSquare заполняем квадрат
 func drawSquare(canvas *[][]bool, l int, x, y byte) {
 	for d := 0; d < 4; d++ {
@@ -173,10 +165,14 @@ func drawSearchNode(canvas *[][]bool, i, j byte) {
 }
 
 // drawSearchNodes наносим на холст поисковые узоры
-func drawSearchNodes(canvas *[][]bool) {
+func drawSearchNodes(canvas *[][]bool, busyRangeModuls *[]Rectangle) {
 	drawSearchNode(canvas, 3, 3)
 	drawSearchNode(canvas, byte(len(*canvas)-4), 3)
 	drawSearchNode(canvas, 3, byte(len(*canvas)-4))
+	lengthCanvas := byte(len(*canvas))
+	*busyRangeModuls = append(*busyRangeModuls, Rectangle{0, 0, 8, 8})
+	*busyRangeModuls = append(*busyRangeModuls, Rectangle{0, lengthCanvas - 8, 8, lengthCanvas - 1})
+	*busyRangeModuls = append(*busyRangeModuls, Rectangle{lengthCanvas - 8, 0, lengthCanvas - 1, 8})
 }
 
 // drawAlignmentNode наносим на холст выравнивающий узор
@@ -186,32 +182,58 @@ func drawAlignmentNode(canvas *[][]bool, i, j byte) {
 }
 
 // drawSearchNodes наносим на холст выравнивающие узоры
-func drawAlignmentNodes(canvas *[][]bool, version byte) {
+func drawAlignmentNodes(canvas *[][]bool, version byte, busyRangeModuls *[]Rectangle) {
 	locationAlignmentPatterns := LocationAlignmentPatterns[version]
-	lengthAlignmentPatterns := len(locationAlignmentPatterns)
-	for i := 0; i < lengthAlignmentPatterns; i++ {
-		for j := 0; j < lengthAlignmentPatterns; j++ {
+	lengthAlignmentPatterns := byte(len(locationAlignmentPatterns))
+	var i, j byte
+	for i = 0; i < lengthAlignmentPatterns; i++ {
+		for j = 0; j < lengthAlignmentPatterns; j++ {
 			if version > 6 {
 				if i == 0 && j == 0 || i == 0 && j == lengthAlignmentPatterns-1 || i == lengthAlignmentPatterns-1 && j == 0 {
 					continue
 				}
 			}
 			drawAlignmentNode(canvas, locationAlignmentPatterns[i], locationAlignmentPatterns[j])
+			*busyRangeModuls = append(*busyRangeModuls, Rectangle{locationAlignmentPatterns[i] - 2, locationAlignmentPatterns[j] - 2, locationAlignmentPatterns[i] + 2, locationAlignmentPatterns[j] + 2})
 		}
 	}
 }
 
 // drawSynchronizationLine наносим на холст линии синхронизации
-func drawSynchronizationLines(canvas *[][]bool) {
+func drawSynchronizationLines(canvas *[][]bool, busyRangeModuls *[]Rectangle) {
 	y := 6
 	for x := 8; x < len(*canvas)-8; x += 2 {
 		(*canvas)[x][y] = I
 		(*canvas)[y][x] = I
 	}
+	lengthCanvas := byte(len(*canvas))
+	*busyRangeModuls = append(*busyRangeModuls, Rectangle{6, 0, 6, lengthCanvas - 1})
+	*busyRangeModuls = append(*busyRangeModuls, Rectangle{0, 6, lengthCanvas - 1, 6})
+}
+
+// drawCodeVersion наносим код версии
+func drawCodeVersion(canvas *[][]bool, version byte, busyRangeModuls *[]Rectangle) {
+	if version > 6 {
+		lengthCanvas := byte(len(*canvas))
+		var i byte
+		for i = 0; i < 3; i++ {
+			arr := CodeVersion[version]
+			for j := 0; j < 6; j++ {
+				(*canvas)[i+lengthCanvas-11][j] = arr[i][j]
+				(*canvas)[j][i+lengthCanvas-11] = arr[i][j]
+			}
+		}
+		*busyRangeModuls = append(*busyRangeModuls, Rectangle{0, lengthCanvas - 11, 6, lengthCanvas - 9})
+		*busyRangeModuls = append(*busyRangeModuls, Rectangle{lengthCanvas - 11, 0, lengthCanvas - 9, 6})
+	}
+}
+
+type Rectangle struct {
+	iLeftUp, jLeftUp, iRightDown, jRightDown byte
 }
 
 // generateInfoCanvas генерируем холст и заполняем информационные данные
-func generateInfoCanvas(version byte) [][]bool {
+func generateInfoCanvas(version byte) ([][]bool, []Rectangle) {
 	lengthCanvas := LengthCanvas[version-1]
 	canvas := make([][]bool, lengthCanvas)
 	var i byte
@@ -219,9 +241,12 @@ func generateInfoCanvas(version byte) [][]bool {
 		canvas[i] = make([]bool, lengthCanvas)
 	}
 
-	drawSearchNodes(&canvas)
-	drawSynchronizationLines(&canvas)
-	drawAlignmentNodes(&canvas, version)
+	busyRangeModuls := []Rectangle{}
 
-	return canvas
+	drawSearchNodes(&canvas, &busyRangeModuls)
+	drawSynchronizationLines(&canvas, &busyRangeModuls)
+	drawAlignmentNodes(&canvas, version, &busyRangeModuls)
+	drawCodeVersion(&canvas, version, &busyRangeModuls)
+
+	return canvas, busyRangeModuls
 }

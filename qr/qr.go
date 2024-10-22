@@ -212,43 +212,51 @@ var (
 	LengthCanvas = []byte{21, 25, 29, 33, 37, 41, 45, 49, 53, 57, 61, 65, 69, 73, 77, 81, 85, 89, 93, 97, 101, 105, 109, 113, 117, 121, 125, 129, 133, 137, 141, 145, 149, 153, 157, 161, 165, 169, 173, 149}
 )
 
+// Окрас модулей
+const (
+	Withe = false
+	Black = true
+	O     = false
+	I     = true
+)
+
 // CodeVersion Коды версий.
 var (
-	CodeVersion = map[byte][]byte{
-		7:  {0b00000010, 0b00011110, 0b00100110},
-		8:  {0b00010001, 0b00011100, 0b00111000},
-		9:  {0b00110111, 0b00011000, 0b00000100},
-		10: {0b00101001, 0b00111110, 0b00000000},
-		11: {0b00001111, 0b00111010, 0b00111100},
-		12: {0b00001101, 0b00100100, 0b00011010},
-		13: {0b00101011, 0b00100000, 0b00100110},
-		14: {0b00110101, 0b00000110, 0b00100010},
-		15: {0b00010011, 0b00000010, 0b00011110},
-		16: {0b00011100, 0b00010001, 0b00011100},
-		17: {0b00111010, 0b00010101, 0b00100000},
-		18: {0b00100100, 0b00110011, 0b00100100},
-		19: {0b00000010, 0b00110111, 0b00011000},
-		20: {0b00000000, 0b00101001, 0b00111110},
-		21: {0b00100110, 0b00101101, 0b00000010},
-		22: {0b00111000, 0b00001011, 0b00000110},
-		23: {0b00011110, 0b00001111, 0b00111010},
-		24: {0b00001101, 0b00001101, 0b00100100},
-		25: {0b00101011, 0b00001001, 0b00011000},
-		26: {0b00110101, 0b00101111, 0b00011100},
-		27: {0b00010011, 0b00101011, 0b00100000},
-		28: {0b00010001, 0b00110101, 0b00000110},
-		29: {0b00110111, 0b00110001, 0b00111010},
-		30: {0b00101001, 0b00010111, 0b00111110},
-		31: {0b00001111, 0b00010011, 0b00000010},
-		32: {0b00101000, 0b00011000, 0b00101101},
-		33: {0b00001110, 0b00011100, 0b00010001},
-		34: {0b00010000, 0b00111010, 0b00010101},
-		35: {0b00110110, 0b00111110, 0b00101001},
-		36: {0b00110100, 0b00100000, 0b00001111},
-		37: {0b00010010, 0b00100100, 0b00110011},
-		38: {0b00001100, 0b00000010, 0b00110111},
-		39: {0b00101010, 0b00000110, 0b00001011},
-		40: {0b00111001, 0b00000100, 0b00010101},
+	CodeVersion = map[byte][][]bool{
+		7:  {[]bool{O, O, O, O, I, O}, []bool{O, I, I, I, I, O}, []bool{I, O, O, I, I, O}},
+		8:  {[]bool{O, I, O, O, O, I}, []bool{O, I, I, I, O, O}, []bool{I, I, I, O, O, O}},
+		9:  {[]bool{I, I, O, I, I, I}, []bool{O, I, I, O, O, O}, []bool{O, O, O, I, O, O}},
+		10: {[]bool{I, O, I, O, O, I}, []bool{I, I, I, I, I, O}, []bool{O, O, O, O, O, O}},
+		11: {[]bool{O, O, I, I, I, I}, []bool{I, I, I, O, I, O}, []bool{I, I, I, I, O, O}},
+		12: {[]bool{O, O, I, I, O, I}, []bool{I, O, O, I, O, O}, []bool{O, I, I, O, I, O}},
+		13: {[]bool{I, O, I, O, I, I}, []bool{I, O, O, O, O, O}, []bool{I, O, O, I, I, O}},
+		14: {[]bool{I, I, O, I, O, I}, []bool{O, O, O, I, I, O}, []bool{I, O, O, O, I, O}},
+		15: {[]bool{O, I, O, O, I, I}, []bool{O, O, O, O, I, O}, []bool{O, I, I, I, I, O}},
+		16: {[]bool{O, I, I, I, O, O}, []bool{O, I, O, O, O, I}, []bool{O, I, I, I, O, O}},
+		17: {[]bool{I, I, I, O, I, O}, []bool{O, I, O, I, O, I}, []bool{I, O, O, O, O, O}},
+		18: {[]bool{I, O, O, I, O, O}, []bool{I, I, O, O, I, I}, []bool{I, O, O, I, O, O}},
+		19: {[]bool{O, O, O, O, I, O}, []bool{I, I, O, I, I, I}, []bool{O, I, I, O, O, O}},
+		20: {[]bool{O, O, O, O, O, O}, []bool{I, O, I, O, O, I}, []bool{I, I, I, I, I, O}},
+		21: {[]bool{I, O, O, I, I, O}, []bool{I, O, I, I, O, I}, []bool{O, O, O, O, I, O}},
+		22: {[]bool{I, I, I, O, O, O}, []bool{O, O, I, O, I, I}, []bool{O, O, O, I, I, O}},
+		23: {[]bool{O, I, I, I, I, O}, []bool{O, O, I, I, I, I}, []bool{I, I, I, O, I, O}},
+		24: {[]bool{O, O, I, I, O, I}, []bool{O, O, I, I, O, I}, []bool{I, O, O, I, O, O}},
+		25: {[]bool{I, O, I, O, I, I}, []bool{O, O, I, O, O, I}, []bool{O, I, I, O, O, O}},
+		26: {[]bool{I, I, O, I, O, I}, []bool{I, O, I, I, I, I}, []bool{O, I, I, I, O, O}},
+		27: {[]bool{O, I, O, O, I, I}, []bool{I, O, I, O, I, I}, []bool{I, O, O, O, O, O}},
+		28: {[]bool{O, I, O, O, O, I}, []bool{I, I, O, I, O, I}, []bool{O, O, O, I, I, O}},
+		29: {[]bool{I, I, O, I, I, I}, []bool{I, I, O, O, O, I}, []bool{I, I, I, O, I, O}},
+		30: {[]bool{I, O, I, O, O, I}, []bool{O, I, O, I, I, I}, []bool{I, I, I, I, I, O}},
+		31: {[]bool{O, O, I, I, I, I}, []bool{O, I, O, O, I, I}, []bool{O, O, O, O, I, O}},
+		32: {[]bool{I, O, I, O, O, O}, []bool{O, I, I, O, O, O}, []bool{I, O, I, I, O, I}},
+		33: {[]bool{O, O, I, I, I, O}, []bool{O, I, I, I, O, O}, []bool{O, I, O, O, O, I}},
+		34: {[]bool{O, I, O, O, O, O}, []bool{I, I, I, O, I, O}, []bool{O, I, O, I, O, I}},
+		35: {[]bool{I, I, O, I, I, O}, []bool{I, I, I, I, I, O}, []bool{I, O, I, O, O, I}},
+		36: {[]bool{I, I, O, I, O, O}, []bool{I, O, O, O, O, O}, []bool{O, O, I, I, I, I}},
+		37: {[]bool{O, I, O, O, I, O}, []bool{I, O, O, I, O, O}, []bool{I, I, O, O, I, I}},
+		38: {[]bool{O, O, I, I, O, O}, []bool{O, O, O, O, I, O}, []bool{I, I, O, I, I, I}},
+		39: {[]bool{I, O, I, O, I, O}, []bool{O, O, O, I, I, O}, []bool{O, O, I, O, I, I}},
+		40: {[]bool{I, I, I, O, O, I}, []bool{O, O, O, I, O, O}, []bool{O, I, O, I, O, I}},
 	}
 )
 

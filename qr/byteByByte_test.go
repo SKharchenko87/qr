@@ -149,7 +149,8 @@ func Test_drawAlignmentNode(t *testing.T) {
 
 func Test_drawSynchronizationLines(t *testing.T) {
 	type args struct {
-		canvas *[][]bool
+		canvas          *[][]bool
+		busyRangeModuls *[]Rectangle
 	}
 	tests := []struct {
 		name string
@@ -182,7 +183,7 @@ func Test_drawSynchronizationLines(t *testing.T) {
 			{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
 			{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
 			{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
-		}}, [][]bool{
+		}, &[]Rectangle{}}, [][]bool{
 			{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
 			{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
 			{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
@@ -212,7 +213,7 @@ func Test_drawSynchronizationLines(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			drawSynchronizationLines(tt.args.canvas)
+			drawSynchronizationLines(tt.args.canvas, tt.args.busyRangeModuls)
 			if !reflect.DeepEqual(tt.args.canvas, &tt.want) {
 				t.Errorf("drawSynchronizationLine() = %v, want %v", tt.args.canvas, tt.want)
 			}
@@ -220,14 +221,15 @@ func Test_drawSynchronizationLines(t *testing.T) {
 	}
 }
 
-func Test_generateInfoCanvas(t *testing.T) {
+func Test_generateInfoCanvas1(t *testing.T) {
 	type args struct {
 		version byte
 	}
 	tests := []struct {
-		name string
-		args args
-		want [][]bool
+		name  string
+		args  args
+		want  [][]bool
+		want1 []Rectangle
 	}{
 		//{"1", args{1}, [][]bool{{true, false, true, false}}},
 		{"2", args{2}, [][]bool{
@@ -256,12 +258,84 @@ func Test_generateInfoCanvas(t *testing.T) {
 			{I, O, I, I, I, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
 			{I, O, O, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
 			{I, I, I, I, I, I, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+		}, []Rectangle{
+			{iLeftUp: 0, jLeftUp: 0, iRightDown: 8, jRightDown: 8},
+			{iLeftUp: 0, jLeftUp: 17, iRightDown: 8, jRightDown: 24},
+			{iLeftUp: 17, jLeftUp: 0, iRightDown: 24, jRightDown: 8},
+			{iLeftUp: 6, jLeftUp: 0, iRightDown: 6, jRightDown: 24},
+			{iLeftUp: 0, jLeftUp: 6, iRightDown: 24, jRightDown: 6},
+			{iLeftUp: 16, jLeftUp: 16, iRightDown: 20, jRightDown: 20},
+		}},
+		{"7", args{7}, [][]bool{
+			{I, I, I, I, I, I, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, I, O, I, I, I, I, I, I, I},
+			{I, O, O, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, I, O, O, I, O, O, O, O, O, I},
+			{I, O, I, I, I, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, I, O, O, I, O, I, I, I, O, I},
+			{I, O, I, I, I, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, I, I, O, I, O, I, I, I, O, I},
+			{I, O, I, I, I, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, I, I, I, I, I, O, O, O, O, O, O, O, O, O, I, I, I, O, I, O, I, I, I, O, I},
+			{I, O, O, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, I, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, I, O, O, O, O, O, I},
+			{I, I, I, I, I, I, I, O, I, O, I, O, I, O, I, O, I, O, I, O, I, O, I, O, I, O, I, O, I, O, I, O, I, O, I, O, I, O, I, I, I, I, I, I, I},
+			{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, I, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+			{O, O, O, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, I, I, I, I, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+			{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+			{O, O, O, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+			{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+			{O, O, O, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+			{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+			{O, O, O, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+			{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+			{O, O, O, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+			{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+			{O, O, O, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+			{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+			{O, O, O, O, I, I, I, I, I, O, O, O, O, O, O, O, O, O, O, O, I, I, I, I, I, O, O, O, O, O, O, O, O, O, O, O, I, I, I, I, I, O, O, O, O},
+			{O, O, O, O, I, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, I, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, I, O, O, O, I, O, O, O, O},
+			{O, O, O, O, I, O, I, O, I, O, O, O, O, O, O, O, O, O, O, O, I, O, I, O, I, O, O, O, O, O, O, O, O, O, O, O, I, O, I, O, I, O, O, O, O},
+			{O, O, O, O, I, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, I, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, I, O, O, O, I, O, O, O, O},
+			{O, O, O, O, I, I, I, I, I, O, O, O, O, O, O, O, O, O, O, O, I, I, I, I, I, O, O, O, O, O, O, O, O, O, O, O, I, I, I, I, I, O, O, O, O},
+			{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+			{O, O, O, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+			{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+			{O, O, O, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+			{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+			{O, O, O, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+			{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+			{O, O, O, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+			{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+			{O, O, O, O, I, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+			{O, I, I, I, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+			{I, O, O, I, I, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, I, I, I, I, I, O, O, O, O, O, O, O, O, O, O, O, I, I, I, I, I, O, O, O, O},
+			{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, I, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, I, O, O, O, I, O, O, O, O},
+			{I, I, I, I, I, I, I, O, O, O, O, O, O, O, O, O, O, O, O, O, I, O, I, O, I, O, O, O, O, O, O, O, O, O, O, O, I, O, I, O, I, O, O, O, O},
+			{I, O, O, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, I, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, I, O, O, O, I, O, O, O, O},
+			{I, O, I, I, I, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, I, I, I, I, I, O, O, O, O, O, O, O, O, O, O, O, I, I, I, I, I, O, O, O, O},
+			{I, O, I, I, I, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+			{I, O, I, I, I, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+			{I, O, O, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+			{I, I, I, I, I, I, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+		}, []Rectangle{
+			{iLeftUp: 0, jLeftUp: 0, iRightDown: 8, jRightDown: 8},
+			{iLeftUp: 0, jLeftUp: 37, iRightDown: 8, jRightDown: 44},
+			{iLeftUp: 37, jLeftUp: 0, iRightDown: 44, jRightDown: 8},
+			{iLeftUp: 6, jLeftUp: 0, iRightDown: 6, jRightDown: 44},
+			{iLeftUp: 0, jLeftUp: 6, iRightDown: 44, jRightDown: 6},
+			{iLeftUp: 4, jLeftUp: 20, iRightDown: 8, jRightDown: 24},
+			{iLeftUp: 20, jLeftUp: 4, iRightDown: 24, jRightDown: 8},
+			{iLeftUp: 20, jLeftUp: 20, iRightDown: 24, jRightDown: 24},
+			{iLeftUp: 20, jLeftUp: 36, iRightDown: 24, jRightDown: 40},
+			{iLeftUp: 36, jLeftUp: 20, iRightDown: 40, jRightDown: 24},
+			{iLeftUp: 36, jLeftUp: 36, iRightDown: 40, jRightDown: 40},
+			{iLeftUp: 0, jLeftUp: 34, iRightDown: 6, jRightDown: 36},
+			{iLeftUp: 34, jLeftUp: 0, iRightDown: 36, jRightDown: 6},
 		}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := generateInfoCanvas(tt.args.version); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("generateInfoCanvas() = %v, want %v", got, tt.want)
+			got, got1 := generateInfoCanvas(tt.args.version)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("generateInfoCanvas() got = %v, want %v", got, tt.want)
+			}
+			if !reflect.DeepEqual(got1, tt.want1) {
+				t.Errorf("generateInfoCanvas() got1 = %v, want %v", got1, tt.want1)
 			}
 		})
 	}

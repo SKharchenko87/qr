@@ -141,3 +141,87 @@ func mergeBlocks(data, correction [][]byte) []byte {
 
 	return res
 }
+
+// direction направления для рисования квадратов
+var direction = [][2]int8{{0, 1}, {1, 0}, {0, -1}, {-1, 0}}
+
+// Окрас модулей
+const (
+	Withe = false
+	Black = true
+	O     = false
+	I     = true
+)
+
+// drawSquare заполняем квадрат
+func drawSquare(canvas *[][]bool, l int, x, y byte) {
+	for d := 0; d < 4; d++ {
+		for _, dd := range direction {
+			for a := 0; a < l; a++ {
+				x, y = x+byte(dd[0]), y+byte(dd[1])
+				(*canvas)[x][y] = Black
+			}
+		}
+	}
+}
+
+// drawSearchNode наносим на холст поисковой узор
+func drawSearchNode(canvas *[][]bool, i, j byte) {
+	(*canvas)[i][j] = Black
+	drawSquare(canvas, 2, i-1, j-1)
+	drawSquare(canvas, 6, i-3, j-3)
+}
+
+// drawSearchNodes наносим на холст поисковые узоры
+func drawSearchNodes(canvas *[][]bool) {
+	drawSearchNode(canvas, 3, 3)
+	drawSearchNode(canvas, byte(len(*canvas)-4), 3)
+	drawSearchNode(canvas, 3, byte(len(*canvas)-4))
+}
+
+// drawAlignmentNode наносим на холст выравнивающий узор
+func drawAlignmentNode(canvas *[][]bool, i, j byte) {
+	(*canvas)[i][j] = Black
+	drawSquare(canvas, 4, i-2, j-2)
+}
+
+// drawSearchNodes наносим на холст выравнивающие узоры
+func drawAlignmentNodes(canvas *[][]bool, version byte) {
+	locationAlignmentPatterns := LocationAlignmentPatterns[version]
+	lengthAlignmentPatterns := len(locationAlignmentPatterns)
+	for i := 0; i < lengthAlignmentPatterns; i++ {
+		for j := 0; j < lengthAlignmentPatterns; j++ {
+			if version > 6 {
+				if i == 0 && j == 0 || i == 0 && j == lengthAlignmentPatterns-1 || i == lengthAlignmentPatterns-1 && j == 0 {
+					continue
+				}
+			}
+			drawAlignmentNode(canvas, locationAlignmentPatterns[i], locationAlignmentPatterns[j])
+		}
+	}
+}
+
+// drawSynchronizationLine наносим на холст линии синхронизации
+func drawSynchronizationLines(canvas *[][]bool) {
+	y := 6
+	for x := 8; x < len(*canvas)-8; x += 2 {
+		(*canvas)[x][y] = I
+		(*canvas)[y][x] = I
+	}
+}
+
+// generateInfoCanvas генерируем холст и заполняем информационные данные
+func generateInfoCanvas(version byte) [][]bool {
+	lengthCanvas := LengthCanvas[version-1]
+	canvas := make([][]bool, lengthCanvas)
+	var i byte
+	for i = 0; i < lengthCanvas; i++ {
+		canvas[i] = make([]bool, lengthCanvas)
+	}
+
+	drawSearchNodes(&canvas)
+	drawSynchronizationLines(&canvas)
+	drawAlignmentNodes(&canvas, version)
+
+	return canvas
+}

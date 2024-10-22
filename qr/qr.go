@@ -208,6 +208,10 @@ var (
 	}
 )
 
+var (
+	LengthCanvas = []byte{21, 25, 29, 33, 37, 41, 45, 49, 53, 57, 61, 65, 69, 73, 77, 81, 85, 89, 93, 97, 101, 105, 109, 113, 117, 121, 125, 129, 133, 137, 141, 145, 149, 153, 157, 161, 165, 169, 173, 149}
+)
+
 // CodeVersion Коды версий.
 var (
 	CodeVersion = map[byte][]byte{
@@ -291,5 +295,19 @@ var (
 			0b0000_1101_0000_1100,
 			0b0000_1000_0011_1011,
 		},
+	}
+)
+
+// Masks
+var (
+	Masks = []func(x, y byte) byte{
+		func(x, y byte) byte { return (x + y) % 2 },
+		func(x, y byte) byte { return y % 2 },
+		func(x, y byte) byte { return x % 3 },
+		func(x, y byte) byte { return (x + y) % 3 },
+		func(x, y byte) byte { return (x/3 + y/2) % 2 },
+		func(x, y byte) byte { return (x*y)%2 + (x*y)%3 },
+		func(x, y byte) byte { return ((x*y)%2 + (x*y)%3) % 2 },
+		func(x, y byte) byte { return ((x*y)%3 + (x+y)%2) % 2 },
 	}
 )

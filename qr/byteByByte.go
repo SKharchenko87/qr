@@ -250,3 +250,71 @@ func generateInfoCanvas(version byte) ([][]bool, []Rectangle) {
 
 	return canvas, busyRangeModuls
 }
+
+var bitMap = []byte{
+	0b1000_0000,
+	0b0100_0000,
+	0b0010_0000,
+	0b0001_0000,
+	0b0000_1000,
+	0b0000_0100,
+	0b0000_0010,
+	0b0000_0001,
+}
+
+func checkFree(busyRangeModuls *[]Rectangle, i, j byte) bool {
+	for _, rectangle := range *busyRangeModuls {
+		if rectangle.iLeftUp <= i && i <= rectangle.iRightDown &&
+			rectangle.jLeftUp <= j && j <= rectangle.jRightDown {
+			return false
+		}
+	}
+	return true
+}
+
+func nextPosition(busyRangeModuls *[]Rectangle, i, j byte, lengthCanvas byte) (byte, byte) {
+	var candidateI, candidateJ int
+	candidateI, candidateJ = int(i), int(j)
+	var flg bool = candidateI != 0 && candidateJ != 0
+	for flg {
+		x := candidateJ % 4
+		if candidateJ > 6 && x == 0 || candidateJ <= 6 && x == 3 {
+			candidateJ--
+		} else if candidateJ > 6 && x == 3 || candidateJ <= 6 && x == 2 {
+			candidateI--
+			candidateJ++
+		} else if candidateJ > 6 && x == 2 || candidateJ <= 6 && x == 1 {
+			candidateJ--
+		} else if candidateJ > 6 && x == 1 || candidateJ <= 6 && x == 0 {
+			candidateI++
+			candidateJ++
+		}
+		if candidateI == -1 {
+			candidateI = 0
+			candidateJ -= 2
+			if candidateJ == 6 {
+				candidateJ--
+			}
+		} else if candidateI == int(lengthCanvas) {
+			candidateI = int(lengthCanvas) - 1
+			candidateJ -= 2
+		}
+		flg = !checkFree(busyRangeModuls, byte(candidateI), byte(candidateJ))
+	}
+	return byte(candidateI), byte(candidateJ)
+}
+
+// generatePreCode генерируем qr код без масок
+func generatePreCode(data []byte, canvas *[][]bool, busyRangeModuls *[]Rectangle) {
+	lengthCanvas := byte(len(*canvas))
+	i, j := lengthCanvas-1, lengthCanvas-1
+	for _, d := range data {
+		for _, b := range bitMap {
+			if d&b > 0 {
+				(*canvas)[i][j] = I
+			}
+			i, j = nextPosition(busyRangeModuls, i, j, lengthCanvas)
+		}
+
+	}
+}

@@ -340,3 +340,160 @@ func Test_generateInfoCanvas1(t *testing.T) {
 		})
 	}
 }
+
+func Test_nextPosition(t *testing.T) {
+	rectangles2 := []Rectangle{
+		{iLeftUp: 0, jLeftUp: 0, iRightDown: 8, jRightDown: 8},
+		{iLeftUp: 0, jLeftUp: 17, iRightDown: 8, jRightDown: 24},
+		{iLeftUp: 17, jLeftUp: 0, iRightDown: 24, jRightDown: 8},
+		{iLeftUp: 6, jLeftUp: 0, iRightDown: 6, jRightDown: 24},
+		{iLeftUp: 0, jLeftUp: 6, iRightDown: 24, jRightDown: 6},
+		{iLeftUp: 16, jLeftUp: 16, iRightDown: 20, jRightDown: 20},
+	}
+	rectangles7 := []Rectangle{
+		{iLeftUp: 0, jLeftUp: 0, iRightDown: 8, jRightDown: 8},
+		{iLeftUp: 0, jLeftUp: 37, iRightDown: 8, jRightDown: 44},
+		{iLeftUp: 37, jLeftUp: 0, iRightDown: 44, jRightDown: 8},
+		{iLeftUp: 6, jLeftUp: 0, iRightDown: 6, jRightDown: 44},
+		{iLeftUp: 0, jLeftUp: 6, iRightDown: 44, jRightDown: 6},
+		{iLeftUp: 4, jLeftUp: 20, iRightDown: 8, jRightDown: 24},
+		{iLeftUp: 20, jLeftUp: 4, iRightDown: 24, jRightDown: 8},
+		{iLeftUp: 20, jLeftUp: 20, iRightDown: 24, jRightDown: 24},
+		{iLeftUp: 20, jLeftUp: 36, iRightDown: 24, jRightDown: 40},
+		{iLeftUp: 36, jLeftUp: 20, iRightDown: 40, jRightDown: 24},
+		{iLeftUp: 36, jLeftUp: 36, iRightDown: 40, jRightDown: 40},
+		{iLeftUp: 0, jLeftUp: 34, iRightDown: 6, jRightDown: 36},
+		{iLeftUp: 34, jLeftUp: 0, iRightDown: 36, jRightDown: 6},
+	}
+	type args struct {
+		busyRangeModuls *[]Rectangle
+		i               byte
+		j               byte
+		lengthCanvas    byte
+	}
+	tests := []struct {
+		name  string
+		args  args
+		want  byte
+		want1 byte
+	}{
+		{"Test 1. QRVersion 2", args{&rectangles2, 24, 24, 25}, 24, 23},
+		{"Test 2. QRVersion 7", args{&rectangles7, 44, 44, 45}, 44, 43},
+		{"Test 3. QRVersion 2", args{&rectangles2, 9, 23, 25}, 9, 22},
+		{"Test 4. QRVersion 2", args{&rectangles2, 21, 20, 25}, 21, 19},
+		{"Test 5. QRVersion 2", args{&rectangles2, 15, 18, 25}, 15, 17},
+		{"Test 6. QRVersion 2", args{&rectangles2, 15, 17, 25}, 21, 18},
+		{"Test 7. QRVersion 2", args{&rectangles2, 21, 15, 25}, 20, 15},
+		{"Test 8. QRVersion 2", args{&rectangles2, 7, 15, 25}, 5, 16},
+		{"Test 9. QRVersion 2", args{&rectangles2, 24, 9, 25}, 16, 8},
+		{"Test 10. QRVersion 2", args{&rectangles2, 9, 7, 25}, 9, 5},
+		{"Test 11. QRVersion 2", args{&rectangles2, 16, 5, 25}, 16, 4},
+		{"Test 12. QRVersion 2", args{&rectangles2, 16, 4, 25}, 16, 3},
+		{"Test 13. QRVersion 7", args{&rectangles7, 7, 35, 45}, 0, 33},
+		{"Test 14. QRVersion 7", args{&rectangles7, 9, 7, 45}, 9, 5},
+		{"Test 15. QRVersion 7", args{&rectangles7, 33, 4, 45}, 33, 3},
+
+		{"Test 3.1 QRVersion 2", args{&rectangles2, 9, 22, 25}, 9, 21},
+		{"Test 3.1 QRVersion 2", args{&rectangles2, 9, 21, 25}, 10, 22},
+		{"Test 3.1 QRVersion 2", args{&rectangles2, 10, 22, 25}, 10, 21},
+		{"Test 3.1 QRVersion 2", args{&rectangles2, 10, 21, 25}, 11, 22},
+		{"Test 3.1 QRVersion 2", args{&rectangles2, 11, 22, 25}, 11, 21},
+		{"Test 3.1 QRVersion 2", args{&rectangles2, 11, 21, 25}, 12, 22},
+		{"Test 3.1 QRVersion 2", args{&rectangles2, 12, 22, 25}, 12, 21},
+		{"Test 3.1 QRVersion 2", args{&rectangles2, 12, 21, 25}, 13, 22},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, got1 := nextPosition(tt.args.busyRangeModuls, tt.args.i, tt.args.j, tt.args.lengthCanvas)
+			if got != tt.want {
+				t.Errorf("nextPosition() got = %v, want %v", got, tt.want)
+			}
+			if got1 != tt.want1 {
+				t.Errorf("nextPosition() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
+	}
+}
+
+func Test_generateCode(t *testing.T) {
+	type args struct {
+		data            []byte
+		canvas          *[][]bool
+		busyRangeModuls *[]Rectangle
+	}
+	tests := []struct {
+		name string
+		args args
+		want [][]bool
+	}{
+		{"Test 1", args{data: []byte{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+			canvas: &[][]bool{
+				{I, I, I, I, I, I, I, O, O, O, O, O, O, O, O, O, O, O, I, I, I, I, I, I, I},
+				{I, O, O, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, I, O, O, O, O, O, I},
+				{I, O, I, I, I, O, I, O, O, O, O, O, O, O, O, O, O, O, I, O, I, I, I, O, I},
+				{I, O, I, I, I, O, I, O, O, O, O, O, O, O, O, O, O, O, I, O, I, I, I, O, I},
+				{I, O, I, I, I, O, I, O, O, O, O, O, O, O, O, O, O, O, I, O, I, I, I, O, I},
+				{I, O, O, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, I, O, O, O, O, O, I},
+				{I, I, I, I, I, I, I, O, I, O, I, O, I, O, I, O, I, O, I, I, I, I, I, I, I},
+				{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+				{O, O, O, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+				{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+				{O, O, O, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+				{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+				{O, O, O, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+				{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+				{O, O, O, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+				{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+				{O, O, O, O, O, O, I, O, O, O, O, O, O, O, O, O, I, I, I, I, I, O, O, O, O},
+				{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, I, O, O, O, I, O, O, O, O},
+				{I, I, I, I, I, I, I, O, O, O, O, O, O, O, O, O, I, O, I, O, I, O, O, O, O},
+				{I, O, O, O, O, O, I, O, O, O, O, O, O, O, O, O, I, O, O, O, I, O, O, O, O},
+				{I, O, I, I, I, O, I, O, O, O, O, O, O, O, O, O, I, I, I, I, I, O, O, O, O},
+				{I, O, I, I, I, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+				{I, O, I, I, I, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+				{I, O, O, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+				{I, I, I, I, I, I, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+			}, busyRangeModuls: &[]Rectangle{
+				{iLeftUp: 0, jLeftUp: 0, iRightDown: 8, jRightDown: 8},
+				{iLeftUp: 0, jLeftUp: 17, iRightDown: 8, jRightDown: 24},
+				{iLeftUp: 17, jLeftUp: 0, iRightDown: 24, jRightDown: 8},
+				{iLeftUp: 6, jLeftUp: 0, iRightDown: 6, jRightDown: 24},
+				{iLeftUp: 0, jLeftUp: 6, iRightDown: 24, jRightDown: 6},
+				{iLeftUp: 16, jLeftUp: 16, iRightDown: 20, jRightDown: 20},
+			}}, [][]bool{
+			{I, I, I, I, I, I, I, O, O, O, I, O, O, O, I, O, O, O, I, I, I, I, I, I, I},
+			{I, O, O, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, I, O, O, O, O, O, I},
+			{I, O, I, I, I, O, I, O, O, O, O, O, O, O, O, O, O, O, I, O, I, I, I, O, I},
+			{I, O, I, I, I, O, I, O, O, O, O, O, I, O, O, O, I, O, I, O, I, I, I, O, I},
+			{I, O, I, I, I, O, I, O, O, O, I, O, O, O, I, O, O, O, I, O, I, I, I, O, I},
+			{I, O, O, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, I, O, O, O, O, O, I},
+			{I, I, I, I, I, I, I, O, I, O, I, O, I, O, I, O, I, O, I, I, I, I, I, I, I},
+			{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+			{O, O, O, O, O, O, I, O, O, O, O, O, I, O, O, O, I, O, O, O, O, O, O, O, O},
+			{O, I, O, O, O, I, O, O, O, O, I, O, O, O, I, O, O, I, O, O, O, O, O, I, O},
+			{O, O, O, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+			{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+			{O, O, O, I, O, O, I, O, I, O, O, O, I, O, O, O, I, O, O, I, O, I, O, O, O},
+			{O, I, O, O, O, I, O, O, O, O, I, O, O, O, I, O, O, I, O, O, O, O, O, I, O},
+			{O, O, O, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+			{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+			{O, O, O, I, O, O, I, O, I, O, O, O, I, O, O, O, I, I, I, I, I, I, O, O, O},
+			{O, O, O, O, O, O, O, O, O, O, I, O, O, O, I, I, I, O, O, O, I, O, O, I, O},
+			{I, I, I, I, I, I, I, O, O, O, O, O, O, O, O, O, I, O, I, O, I, O, O, O, O},
+			{I, O, O, O, O, O, I, O, O, O, O, O, O, O, O, O, I, O, O, O, I, O, O, O, O},
+			{I, O, I, I, I, O, I, O, O, O, O, O, I, O, O, O, I, I, I, I, I, I, O, O, O},
+			{I, O, I, I, I, O, I, O, O, O, I, O, O, O, I, O, O, O, O, I, O, O, O, I, O},
+			{I, O, I, I, I, O, I, O, O, O, O, O, O, O, O, O, O, I, O, O, O, O, O, O, O},
+			{I, O, O, O, O, O, I, O, O, O, O, O, O, O, O, I, O, O, O, O, O, O, O, O, O},
+			{I, I, I, I, I, I, I, O, O, O, O, O, I, O, O, O, O, O, O, O, O, I, O, O, O},
+		}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			generatePreCode(tt.args.data, tt.args.canvas, tt.args.busyRangeModuls)
+			if !reflect.DeepEqual(tt.args.canvas, &tt.want) {
+				t.Errorf("generatePreCode() = %v, want %v", tt.args.canvas, tt.want)
+			}
+		})
+	}
+}

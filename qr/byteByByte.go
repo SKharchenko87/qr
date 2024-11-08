@@ -1,9 +1,16 @@
 package qr
 
 import (
+	"fmt"
 	"math"
 	"slices"
 )
+
+// getVersion - получаем версию по кол-ву бит
+func getVersion(level levelCorrection, bitSizeData int) int {
+	version, _ := slices.BinarySearch(levelToCountBits[level], bitSizeData)
+	return version + 1
+}
 
 //101110001100000
 //________ ________
@@ -15,7 +22,7 @@ import (
 // если количество бит в текущей последовательности байт меньше того,
 // которое нужно для выбранной версии, то оно дополнено чередующимися
 // байтами 11101100 и 00010001.
-func fill(data []byte, level levelCorrection) []byte {
+func fill(data []byte, level levelCorrection) ([]byte, byte) {
 	l := len(data)
 	bitSizeData := l * 8
 	version, _ := slices.BinarySearch(levelToCountBits[level], bitSizeData)
@@ -49,11 +56,11 @@ func fill(data []byte, level levelCorrection) []byte {
 		tmpIndex = (tmpIndex + 1) % 2
 		index++
 	}
-	return res
+	return res, byte(version + 1)
 }
 
 // Разделение информации на блоки - Определение количество байт в каждом блоке
-func getCountByteOfBlock(level levelCorrection, version int) []int {
+func getCountByteOfBlock(level levelCorrection, version byte) []int {
 	bytesData := levelToCountBits[level][version] / 8
 	byteOfBlock := bytesData / CountOfBlocks[level][version]
 	reminderByteOfBlock := bytesData % CountOfBlocks[level][version]
@@ -76,7 +83,7 @@ func fillBlocks(data []byte, countByteOfBlock []int) [][]byte {
 	l := len(countByteOfBlock)
 	res := make([][]byte, l)
 	index := 0
-	for cnt, i := range countByteOfBlock {
+	for i, cnt := range countByteOfBlock {
 		res[i] = make([]byte, cnt)
 		for j := 0; j < cnt; j++ {
 			res[i][j] = data[index]
@@ -87,7 +94,7 @@ func fillBlocks(data []byte, countByteOfBlock []int) [][]byte {
 }
 
 // createByteCorrection Создание байтов коррекции
-func createByteCorrection(level levelCorrection, version int, data *[]byte) []byte {
+func createByteCorrection(level levelCorrection, version byte, data *[]byte) []byte {
 	l := len(*data)
 	lengthCorrectionBytes := NumberOfCorrectionBytesPerBlock[level][version] // lengthCorrectionBytes - Количество байтов коррекции на один блок.
 	polynomials := GeneratePolynomial[lengthCorrectionBytes]                 // polynomials - Генерирующие многочлены.
@@ -122,6 +129,21 @@ func mergeBlocks(data, correction [][]byte) []byte {
 	}
 	index := 0
 	res := make([]byte, lengthRes)
+	//ToDo
+	//for _, ds := range data {
+	//	for _, d := range ds {
+	//		res[index] = d
+	//		index++
+	//	}
+	//}
+	//for _, ds := range correction {
+	//	for _, d := range ds {
+	//		res[index] = d
+	//		index++
+	//	}
+	//}
+	//return res
+
 	var f = func(arr *[][]byte) {
 		l0 := len((*arr)[0])
 		for j := 0; j < l0; j++ {
@@ -276,7 +298,7 @@ func checkFree(busyRangeModuls *[]Rectangle, i, j byte) bool {
 func nextPosition(busyRangeModuls *[]Rectangle, i, j byte, lengthCanvas byte) (byte, byte) {
 	var candidateI, candidateJ int
 	candidateI, candidateJ = int(i), int(j)
-	var flg bool = candidateI != 0 && candidateJ != 0
+	var flg bool = !(candidateI == 0 && candidateJ == 0)
 	for flg {
 		x := candidateJ % 4
 		if candidateJ > 6 && x == 0 || candidateJ <= 6 && x == 3 {
@@ -465,7 +487,7 @@ func getScoreRule6(canvas *[][]bool) int {
 			}
 		}
 	}
-	return int(math.Floor(float64(cntI*100)/float64(lengthCanvas)/float64(lengthCanvas)-50.0)) * 2
+	return abs(int(math.Floor(float64(cntI*100)/float64(lengthCanvas)/float64(lengthCanvas)-50.0)) * 2)
 }
 
 // getScore вычисляем балы для выбора маски по горизонтали
@@ -476,4 +498,104 @@ func getScore(canvas *[][]bool) int {
 		getScoreRule4(canvas) +
 		getScoreRule5(canvas) +
 		getScoreRule6(canvas)
+}
+
+// drawCodeMaskLevelCorrection наносим на холст код маски и уровень коррекции
+func drawCodeMaskLevelCorrection(canvas *[][]bool, level levelCorrection, mask byte) {
+	lengthCanvas := len(*canvas)
+	//LevelCorrection
+	(*canvas)[8][0] = (level>>1)&1 == 1
+	(*canvas)[8][1] = level&1 == 1
+
+	(*canvas)[lengthCanvas-1][8] = (level>>1)&1 == 1
+	(*canvas)[lengthCanvas-2][8] = level&1 == 1
+
+	//Mask
+	var b bool
+	v := CodeMaskLevelCorrection[level][mask]
+	i0 := [][]int{
+		//{-3, 8}, {-4, 8}, {-5, 8}, {-6, 8}, {-7, 8}, {8, -8}, {8, -7}, {8, -6}, {8, -5}, {8, -4}, {8, -3}, {8, -2}, {8, -1}
+		{8, -1}, {8, -2}, {8, -3}, {8, -4}, {8, -5}, {8, -6}, {8, -7}, {8, -8}, {-7, 8}, {-6, 8}, {-5, 8}, {-4, 8}, {-3, 8},
+	}
+	i1 := [][]int{
+		//{8, 2}, {8, 3}, {8, 4}, {8, 5}, {8, 7}, {8, 8}, {7, 8}, {5, 8}, {4, 8}, {3, 8}, {2, 8}, {1, 8}, {0, 8},
+		{0, 8}, {1, 8}, {2, 8}, {3, 8}, {4, 8}, {5, 8}, {7, 8}, {8, 8}, {8, 7}, {8, 5}, {8, 4}, {8, 3}, {8, 2},
+	}
+	(*canvas)[lengthCanvas-8][8] = I
+	for i := 0; i < len(i0); i++ {
+		b = v&1 == 1
+		(*canvas)[(lengthCanvas+i0[i][0])%lengthCanvas][(lengthCanvas+i0[i][1])%lengthCanvas] = b
+		(*canvas)[(lengthCanvas+i1[i][0])%lengthCanvas][(lengthCanvas+i1[i][1])%lengthCanvas] = b
+		v >>= 1
+	}
+}
+
+// drawMask наносим на холст код маски и уровень коррекции
+func drawMask(canvas *[][]bool, busyRangeModuls *[]Rectangle, oldMask, newMask byte) {
+	lengthCanvas := byte(len(*canvas))
+	x, y := lengthCanvas-1, lengthCanvas-1
+	for x != 255 && y != 255 {
+		// ToDo
+		//fmt.Print(y, x, (*canvas)[y][x], " ")
+		if Masks[oldMask](x, y) == 0 && Masks[newMask](x, y) != 0 ||
+			Masks[oldMask](x, y) != 0 && Masks[newMask](x, y) == 0 {
+			(*canvas)[y][x] = !(*canvas)[y][x]
+		}
+		// ToDo
+		//fmt.Println((*canvas)[y][x])
+		y, x = nextPosition(busyRangeModuls, y, x, lengthCanvas)
+	}
+	// ToDo
+	//printQR(canvas)
+}
+
+// ToDo
+func printQR(canvas *[][]bool) {
+	lengthCanvas := len(*canvas)
+	for i := 0; i < lengthCanvas; i++ {
+		for j := 0; j < lengthCanvas; j++ {
+			if (*canvas)[i][j] {
+				fmt.Print("I\t")
+			} else {
+				fmt.Print(".\t")
+			}
+		}
+		fmt.Println()
+	}
+	fmt.Println()
+	fmt.Println()
+	fmt.Println()
+}
+
+func generateQR(text string, level levelCorrection) [][]bool {
+	data, version := fill([]byte(text), level)
+	countByteOfBlock := getCountByteOfBlock(level, version-1)
+	dataBlock := fillBlocks(data, countByteOfBlock)
+
+	correctionBlock := make([][]byte, len(dataBlock))
+	for i, bytes := range dataBlock {
+		correctionBlock[i] = createByteCorrection(level, version-1, &bytes)
+	}
+
+	blocks := mergeBlocks(dataBlock, correctionBlock)
+
+	canvas, busyRangeModuls := generateInfoCanvas(version)
+	generatePreCode(blocks, &canvas, &busyRangeModuls)
+
+	lengthCanvas := len(canvas)
+	candidateCanvas := make([][]bool, lengthCanvas)
+	copy(candidateCanvas, canvas)
+	oldMask := byte(8)
+	for i := 0; i < 8; i++ {
+		drawMask(&candidateCanvas, &busyRangeModuls, oldMask, byte(i))
+		printQR(&candidateCanvas)
+		//drawCodeMaskLevelCorrection(&candidateCanvas, level, byte(i))
+		oldMask = byte(i)
+	}
+
+	//drawMask(&candidateCanvas, &busyRangeModuls, 8, 2)
+	//drawCodeMaskLevelCorrection(&candidateCanvas, level, 2)
+
+	// ToDo применить маску
+	return canvas
 }

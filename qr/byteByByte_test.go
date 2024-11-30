@@ -846,12 +846,12 @@ func Test_fill(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got1 := fill(tt.args.data, tt.args.level)
+			got, got1 := fillBinary(tt.args.data, tt.args.level)
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("fill() got = %v, want %v", got, tt.want)
+				t.Errorf("fillBinary() got = %v, want %v", got, tt.want)
 			}
 			if got1 != tt.want1 {
-				t.Errorf("fill() got1 = %v, want %v", got1, tt.want1)
+				t.Errorf("fillBinary() got1 = %v, want %v", got1, tt.want1)
 			}
 		})
 	}
@@ -1382,12 +1382,215 @@ func Test_drawMask(t *testing.T) {
 				{I, O, O, O, O, O, I, O, O, I, O, O, O, I, I, I, I, O, I, O, O},
 				{I, I, I, I, I, I, I, O, O, I, O, I, I, I, O, O, I, O, I, I, O},
 			}},
+		{
+			"Тест 8. Текст в формате Alphanumeric `0A` маска 1", args{canvas: &[][]bool{
+				{I, I, I, I, I, I, I, O, O, I, I, O, I, O, I, I, I, I, I, I, I},
+				{I, O, O, O, O, O, I, O, I, I, I, I, O, O, I, O, O, O, O, O, I},
+				{I, O, I, I, I, O, I, O, O, I, O, O, I, O, I, O, I, I, I, O, I},
+				{I, O, I, I, I, O, I, O, O, I, I, O, O, O, I, O, I, I, I, O, I},
+				{I, O, I, I, I, O, I, O, I, I, O, I, I, O, I, O, I, I, I, O, I},
+				{I, O, O, O, O, O, I, O, O, O, I, I, O, O, I, O, O, O, O, O, I},
+				{I, I, I, I, I, I, I, O, I, O, I, O, I, O, I, I, I, I, I, I, I},
+				{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+				{I, O, I, O, I, O, I, O, O, I, O, O, I, O, O, O, I, O, O, I, O},
+				{I, O, I, O, I, O, O, I, I, O, I, I, O, I, O, I, O, I, O, I, I},
+				{O, I, I, O, I, I, I, I, O, O, O, I, O, I, I, I, O, O, I, O, O},
+				{O, O, I, O, I, I, O, O, O, O, I, I, I, I, O, I, I, I, O, I, O},
+				{O, I, I, I, I, I, I, O, O, I, O, I, O, I, I, I, O, O, I, O, I},
+				{O, O, O, O, O, O, O, O, I, I, I, O, O, O, I, O, O, O, I, I, O},
+				{I, I, I, I, I, I, I, O, O, I, I, O, I, O, O, O, I, O, O, O, I},
+				{I, O, O, O, O, O, I, O, O, O, I, O, O, O, I, O, O, O, I, O, O},
+				{I, O, I, I, I, O, I, O, I, I, I, O, I, O, I, O, I, O, I, O, I},
+				{I, O, I, I, I, O, I, O, O, I, I, I, O, I, O, I, O, I, O, I, O},
+				{I, O, I, I, I, O, I, O, I, O, O, I, O, I, I, I, O, I, I, O, I},
+				{I, O, O, O, O, O, I, O, O, I, O, I, I, I, O, I, I, I, O, I, I},
+				{I, I, I, I, I, I, I, O, I, I, I, I, O, I, I, I, O, I, I, O, I},
+			}, busyRangeModuls: &[]Rectangle{
+				{0, 0, 8, 8},
+				{0, 13, 8, 20},
+				{13, 0, 20, 8},
+				{6, 0, 6, 20},
+				{0, 6, 20, 6},
+			}, oldMask: 0, newMask: 8},
+			&[][]bool{
+				{I, I, I, I, I, I, I, O, O, O, O, O, O, O, I, I, I, I, I, I, I},
+				{I, O, O, O, O, O, I, O, O, I, O, O, O, O, I, O, O, O, O, O, I},
+				{I, O, I, I, I, O, I, O, O, I, O, I, O, O, I, O, I, I, I, O, I},
+				{I, O, I, I, I, O, I, O, O, O, O, O, I, O, I, O, I, I, I, O, I},
+				{I, O, I, I, I, O, I, O, O, O, I, I, I, O, I, O, I, I, I, O, I},
+				{I, O, O, O, O, O, I, O, O, I, I, O, O, O, I, O, O, O, O, O, I},
+				{I, I, I, I, I, I, I, O, I, O, I, O, I, O, I, I, I, I, I, I, I},
+				{O, O, O, O, O, O, O, O, O, I, I, O, O, O, O, O, O, O, O, O, O},
+				{O, O, O, O, O, O, I, O, O, I, I, I, I, O, O, O, O, O, O, O, O},
+				{O, I, I, I, I, I, O, O, O, O, I, I, O, I, O, O, I, O, I, O, O},
+				{I, I, I, O, O, O, I, I, I, I, O, I, O, I, O, O, I, I, O, I, O},
+				{O, O, O, O, I, O, O, O, I, O, O, O, I, O, O, I, O, I, I, I, I},
+				{I, I, I, I, O, I, I, O, O, I, O, I, O, I, I, O, I, I, I, O, I},
+				{O, O, O, O, O, O, O, O, O, I, I, I, O, O, O, O, I, I, O, I, O},
+				{I, I, I, I, I, I, I, O, O, O, O, I, I, O, O, I, O, O, I, I, I},
+				{I, O, O, O, O, O, I, O, O, O, O, I, I, I, I, I, O, I, I, I, O},
+				{I, O, I, I, I, O, I, O, O, O, O, O, I, O, O, O, I, O, I, O, O},
+				{I, O, I, I, I, O, I, O, O, I, O, O, O, O, I, O, I, O, O, I, I},
+				{I, O, I, I, I, O, I, O, O, O, O, O, O, I, I, O, O, O, I, O, I},
+				{I, O, O, O, O, O, I, O, O, I, O, O, O, I, I, I, I, O, I, O, O},
+				{I, I, I, I, I, I, I, O, O, I, O, I, I, I, O, O, I, O, I, I, O},
+			}},
+
+		{
+			"Тест 9. Текст в формате Alphanumeric `123` маска 1", args{canvas: &[][]bool{
+				{I, I, I, I, I, I, I, O, O, O, I, O, I, O, I, I, I, I, I, I, I},
+				{I, O, O, O, O, O, I, O, O, O, I, I, I, O, I, O, O, O, O, O, I},
+				{I, O, I, I, I, O, I, O, I, I, I, I, I, O, I, O, I, I, I, O, I},
+				{I, O, I, I, I, O, I, O, I, O, O, I, I, O, I, O, I, I, I, O, I},
+				{I, O, I, I, I, O, I, O, I, O, O, O, I, O, I, O, I, I, I, O, I},
+				{I, O, O, O, O, O, I, O, I, O, O, I, O, O, I, O, O, O, O, O, I},
+				{I, I, I, I, I, I, I, O, I, O, I, O, I, O, I, I, I, I, I, I, I},
+				{O, O, O, O, O, O, O, O, I, O, I, O, O, O, O, O, O, O, O, O, O},
+				{I, O, I, I, I, I, I, O, O, I, O, I, O, O, I, I, I, I, I, O, O},
+				{O, O, O, O, O, O, O, O, O, O, O, I, I, I, I, O, O, O, I, I, I},
+				{O, I, O, I, O, O, I, I, I, O, I, O, I, O, I, I, O, O, I, I, I},
+				{O, I, I, O, I, I, O, O, I, I, I, I, I, I, I, O, O, I, O, O, I},
+				{I, O, O, O, I, I, I, O, O, O, I, O, I, O, O, I, O, O, I, O, O},
+				{O, O, O, O, O, O, O, O, I, I, I, O, I, O, O, I, O, O, I, O, O},
+				{I, I, I, I, I, I, I, O, O, O, I, I, O, I, O, O, I, O, I, O, I},
+				{I, O, O, O, O, O, I, O, I, O, I, O, O, O, O, I, I, O, I, I, O},
+				{I, O, I, I, I, O, I, O, I, O, I, I, O, I, O, O, I, O, I, O, O},
+				{I, O, I, I, I, O, I, O, I, O, I, I, I, I, I, O, O, I, O, O, O},
+				{I, O, I, I, I, O, I, O, I, O, O, O, I, O, I, I, O, O, O, O, O},
+				{I, O, O, O, O, O, I, O, O, I, O, I, I, I, I, O, O, I, O, O, I},
+				{I, I, I, I, I, I, I, O, I, I, I, O, I, O, O, I, O, O, I, O, O},
+			}, busyRangeModuls: &[]Rectangle{
+				{0, 0, 8, 8},
+				{0, 13, 8, 20},
+				{13, 0, 20, 8},
+				{6, 0, 6, 20},
+				{0, 6, 20, 6},
+			}, oldMask: 2, newMask: 8},
+			&[][]bool{}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			drawMask(tt.args.canvas, tt.args.busyRangeModuls, tt.args.oldMask, tt.args.newMask)
 			if !reflect.DeepEqual(tt.args.canvas, tt.want) {
 				t.Errorf("generateQR() = %v, want %v", tt.args.canvas, tt.want)
+			}
+		})
+	}
+}
+
+//func Test_generateQR1(t *testing.T) {
+//	type args struct {
+//		text  string
+//		level levelCorrection
+//	}
+//	tests := []struct {
+//		name string
+//		args args
+//		want [][]bool
+//	}{
+//		{"Test 1", args{"1234567890", Medium}, [][]bool{
+//			{I, I, I, I, I, I, I, O, O, O, O, O, O, O, I, I, I, I, I, I, I},
+//			{I, O, O, O, O, O, I, O, O, I, O, O, O, O, I, O, O, O, O, O, I},
+//			{I, O, I, I, I, O, I, O, O, I, O, I, O, O, I, O, I, I, I, O, I},
+//			{I, O, I, I, I, O, I, O, O, O, O, O, I, O, I, O, I, I, I, O, I},
+//			{I, O, I, I, I, O, I, O, O, O, I, I, I, O, I, O, I, I, I, O, I},
+//			{I, O, O, O, O, O, I, O, O, I, I, O, O, O, I, O, O, O, O, O, I},
+//			{I, I, I, I, I, I, I, O, I, O, I, O, I, O, I, I, I, I, I, I, I},
+//			{O, O, O, O, O, O, O, O, O, I, I, O, O, O, O, O, O, O, O, O, O},
+//			{O, O, O, O, O, O, I, O, O, I, I, I, I, O, O, O, O, O, O, O, O},
+//			{O, I, I, I, I, I, O, O, O, O, I, I, O, I, O, O, I, O, I, O, O},
+//			{I, I, I, O, O, O, I, I, I, I, O, I, O, I, O, O, I, I, O, I, O},
+//			{O, O, O, O, I, O, O, O, I, O, O, O, I, O, O, I, O, I, I, I, I},
+//			{I, I, I, I, O, I, I, O, O, I, O, I, O, I, I, O, I, I, I, O, I},
+//			{O, O, O, O, O, O, O, O, O, I, I, I, O, O, O, O, I, I, O, I, O},
+//			{I, I, I, I, I, I, I, O, O, O, O, I, I, O, O, I, O, O, I, I, I},
+//			{I, O, O, O, O, O, I, O, O, O, O, I, I, I, I, I, O, I, I, I, O},
+//			{I, O, I, I, I, O, I, O, O, O, O, O, I, O, O, O, I, O, I, O, O},
+//			{I, O, I, I, I, O, I, O, O, I, O, O, O, O, I, O, I, O, O, I, I},
+//			{I, O, I, I, I, O, I, O, O, O, O, O, O, I, I, O, O, O, I, O, I},
+//			{I, O, O, O, O, O, I, O, O, I, O, O, O, I, I, I, I, O, I, O, O},
+//			{I, I, I, I, I, I, I, O, O, I, O, I, I, I, O, O, I, O, I, I, O},
+//		}},
+//	}
+//	for _, tt := range tests {
+//		t.Run(tt.name, func(t *testing.T) {
+//			if got := generateQR1(tt.args.text, tt.args.level); !reflect.DeepEqual(got, tt.want) {
+//				t.Errorf("generateQR1() = %v, want %v", got, tt.want)
+//			}
+//		})
+//	}
+//}
+
+func Test_fillNumeric(t *testing.T) {
+	type args struct {
+		data  []byte
+		level levelCorrection
+	}
+	tests := []struct {
+		name  string
+		args  args
+		want  []byte
+		want1 byte
+	}{
+		{"Test 0", args{[]byte("1234567890"), Medium}, []byte{16, 40, 123, 114, 49, 80, 0, 236, 17, 236, 17, 236, 17, 236, 17, 236}, 1},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, got1 := fillNumeric(tt.args.data, tt.args.level)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("fillNumeric() got = %v, want %v", got, tt.want)
+			}
+			if got1 != tt.want1 {
+				t.Errorf("fillNumeric() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
+	}
+}
+
+func Test_generateQR2(t *testing.T) {
+	type args struct {
+		text  string
+		level levelCorrection
+	}
+	tests := []struct {
+		name string
+		args args
+		want [][]bool
+	}{
+		{"Test 1", args{"123", Medium}, [][]bool{}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := generateQR2(tt.args.text, tt.args.level); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("generateQR2() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_fillAlphanumeric(t *testing.T) {
+	type args struct {
+		data  []byte
+		level levelCorrection
+	}
+	tests := []struct {
+		name  string
+		args  args
+		want  []byte
+		want1 byte
+	}{
+		{"Test 1. '0A' ", args{[]byte("0A"), Medium}, []byte{32, 16, 10, 0, 236, 17, 236, 17, 236, 17, 236, 17, 236, 17, 236, 17}, 1},
+		{"Test 2. 'HELLO' ", args{[]byte("HELLO"), Medium}, []byte{32, 43, 11, 120, 204, 0, 236, 17, 236, 17, 236, 17, 236, 17, 236, 17}, 1},
+		{"Test 3. '123' ", args{[]byte("123"), Medium}, []byte{32, 24, 47, 12, 0, 236, 17, 236, 17, 236, 17, 236, 17, 236, 17, 236}, 1},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, got1 := fillAlphanumeric(tt.args.data, tt.args.level)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("fillAlphanumeric() got = %v, want %v", got, tt.want)
+			}
+			if got1 != tt.want1 {
+				t.Errorf("fillAlphanumeric() got1 = %v, want %v", got1, tt.want1)
 			}
 		})
 	}

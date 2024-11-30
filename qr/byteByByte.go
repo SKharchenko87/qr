@@ -66,6 +66,10 @@ func fillAlphanumeric(data []byte, level levelCorrection) ([]byte, byte) {
 			}
 		}
 	}
+	//ToDo эксперементально получено
+	if res[index] != 0 {
+		index++
+	}
 	index++
 	offset = 7
 	tmp := [2]byte{0b11101100, 0b00010001}
@@ -386,6 +390,11 @@ func generateQR2(text string, level levelCorrection) [][]bool {
 	copy(candidateCanvas, canvas)
 	oldMask := byte(8)
 	printQR(&candidateCanvas)
+	//drawMask(&candidateCanvas, &busyRangeModuls, 8, 2)
+	//drawCodeMaskLevelCorrection(&candidateCanvas, level, 2)
+	//printQR(&candidateCanvas)
+	//drawMask(&candidateCanvas, &busyRangeModuls, 2, 8)
+	//drawCodeMaskLevelCorrection(&candidateCanvas, level, 8)
 	for i := 0; i < 8; i++ {
 		drawMask(&candidateCanvas, &busyRangeModuls, oldMask, byte(i))
 		drawCodeMaskLevelCorrection(&candidateCanvas, level, byte(i))

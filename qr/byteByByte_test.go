@@ -1557,7 +1557,7 @@ func Test_generateQR2(t *testing.T) {
 		args args
 		want [][]bool
 	}{
-		{"Test 1", args{"123", Medium}, [][]bool{}},
+		{"Test 1", args{"ABCDE", Medium}, [][]bool{}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -1582,6 +1582,13 @@ func Test_fillAlphanumeric(t *testing.T) {
 		{"Test 1. '0A' ", args{[]byte("0A"), Medium}, []byte{32, 16, 10, 0, 236, 17, 236, 17, 236, 17, 236, 17, 236, 17, 236, 17}, 1},
 		{"Test 2. 'HELLO' ", args{[]byte("HELLO"), Medium}, []byte{32, 43, 11, 120, 204, 0, 236, 17, 236, 17, 236, 17, 236, 17, 236, 17}, 1},
 		{"Test 3. '123' ", args{[]byte("123"), Medium}, []byte{32, 24, 47, 12, 0, 236, 17, 236, 17, 236, 17, 236, 17, 236, 17, 236}, 1},
+		{"Test 4. '1234' ", args{[]byte("1234"), Medium}, []byte{32, 32, 47, 17, 96, 0, 236, 17, 236, 17, 236, 17, 236, 17, 236, 17}, 1},
+		{"Test 5. '12345' ", args{[]byte("12345"), Medium}, []byte{32, 40, 47, 17, 98, 128, 0, 236, 17, 236, 17, 236, 17, 236, 17, 236}, 1},
+		{"Test 6. 'A' ", args{[]byte("A"), Medium}, []byte{32, 9, 64, 0, 236, 17, 236, 17, 236, 17, 236, 17, 236, 17, 236, 17}, 1},
+		{"Test 7. 'AB' ", args{[]byte("AB"), Medium}, []byte{32, 17, 205, 0, 236, 17, 236, 17, 236, 17, 236, 17, 236, 17, 236, 17}, 1},
+		{"Test 8. 'ABC' ", args{[]byte("ABC"), Medium}, []byte{32, 25, 205, 48, 0, 236, 17, 236, 17, 236, 17, 236, 17, 236, 17, 236}, 1},
+		{"Test 9. 'ABCD' ", args{[]byte("ABCD"), Medium}, []byte{32, 33, 205, 69, 32, 0, 236, 17, 236, 17, 236, 17, 236, 17, 236, 17}, 1},
+		{"Test 9. 'ABCDE' ", args{[]byte("ABCDE"), Medium}, []byte{32, 41, 205, 69, 39, 0, 236, 17, 236, 17, 236, 17, 236, 17, 236, 17}, 1},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

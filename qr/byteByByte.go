@@ -125,6 +125,7 @@ func fillBinary(data []byte, level levelCorrection) ([]byte, byte) {
 		index++
 		res[index] |= byte(data[i] & 0b0000_0000_0000_0000_0000_0000_0000_1111 << 4)
 	}
+
 	index++
 	tmp := [2]byte{0b11101100, 0b00010001}
 	tmpIndex := 0
@@ -134,6 +135,7 @@ func fillBinary(data []byte, level levelCorrection) ([]byte, byte) {
 		index++
 	}
 	return res, byte(version + 1)
+
 }
 
 // fillNumeric - заполнение цифровое
@@ -314,37 +316,4 @@ func mergeBlocks(data, correction [][]byte) []byte {
 	f(&correction)
 
 	return res
-}
-
-func generateQR(text string, level levelCorrection) [][]bool {
-	data, version := fillBinary([]byte(text), level)
-	countByteOfBlock := getCountByteOfBlock(level, version-1)
-	dataBlock := fillBlocks(data, countByteOfBlock)
-
-	correctionBlock := make([][]byte, len(dataBlock))
-	for i, bytes := range dataBlock {
-		correctionBlock[i] = createByteCorrection(level, version-1, &bytes)
-	}
-
-	blocks := mergeBlocks(dataBlock, correctionBlock)
-
-	canvas, busyRangeModuls := generateInfoCanvas(version)
-	generatePreCode(blocks, &canvas, &busyRangeModuls)
-
-	lengthCanvas := len(canvas)
-	candidateCanvas := make([][]bool, lengthCanvas)
-	copy(candidateCanvas, canvas)
-	oldMask := byte(8)
-	for i := 0; i < 8; i++ {
-		drawMask(&candidateCanvas, &busyRangeModuls, oldMask, byte(i))
-		printQR(&candidateCanvas)
-		//drawCodeMaskLevelCorrection(&candidateCanvas, level, byte(i))
-		oldMask = byte(i)
-	}
-
-	//drawMask(&candidateCanvas, &busyRangeModuls, 8, 2)
-	//drawCodeMaskLevelCorrection(&candidateCanvas, level, 2)
-
-	// ToDo применить маску
-	return canvas
 }

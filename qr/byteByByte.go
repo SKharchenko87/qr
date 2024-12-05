@@ -1,7 +1,6 @@
 package qr
 
 import (
-	"fmt"
 	"slices"
 )
 
@@ -20,7 +19,7 @@ func fillAlphanumeric(data []byte, level levelCorrection) ([]byte, byte) {
 	if l%2 == 1 {
 		bitSizeData = (l-1)/2*11 + 6
 	} else {
-		bitSizeData = l * 11
+		bitSizeData = l / 2 * 11
 	}
 
 	version, _ := slices.BinarySearch(levelToCountBits[level], bitSizeData)
@@ -66,17 +65,26 @@ func fillAlphanumeric(data []byte, level levelCorrection) ([]byte, byte) {
 			}
 		}
 	}
-	//ToDo эксперементально получено
-	if res[index] != 0 {
-		index++
+	//ToDo Padding
+	for j := 3; j >= 0 && index < levelToCountBits[level][version]/8; j-- {
+		offset--
+		if offset < 0 {
+			offset = 7
+			index++
+		}
 	}
-	index++
-	offset = 7
-	tmp := [2]byte{0b11101100, 0b00010001}
-	tmpIndex := 0
-	for ; index < levelToCountBits[level][version]/8; index++ {
-		res[index] = tmp[tmpIndex]
-		tmpIndex = (tmpIndex + 1) % 2
+	if index != levelToCountBits[level][version]/8 {
+		if offset != 7 {
+			//if res[index] != 7 {
+			index++
+		}
+
+		tmp := [2]byte{0b11101100, 0b00010001}
+		tmpIndex := 0
+		for ; index < levelToCountBits[level][version]/8; index++ {
+			res[index] = tmp[tmpIndex]
+			tmpIndex = (tmpIndex + 1) % 2
+		}
 	}
 	return res, byte(version + 1)
 }
@@ -329,49 +337,6 @@ func generateQR(text string, level levelCorrection) [][]bool {
 	oldMask := byte(8)
 	for i := 0; i < 8; i++ {
 		drawMask(&candidateCanvas, &busyRangeModuls, oldMask, byte(i))
-		printQR(&candidateCanvas)
-		//drawCodeMaskLevelCorrection(&candidateCanvas, level, byte(i))
-		oldMask = byte(i)
-	}
-
-	//drawMask(&candidateCanvas, &busyRangeModuls, 8, 2)
-	//drawCodeMaskLevelCorrection(&candidateCanvas, level, 2)
-
-	// ToDo применить маску
-	return canvas
-}
-
-func generateQR2(text string, level levelCorrection) [][]bool {
-	data, version := fillAlphanumeric([]byte(text), level)
-	fmt.Println(version)
-	fmt.Println(data)
-
-	countByteOfBlock := getCountByteOfBlock(level, version-1)
-	dataBlock := fillBlocks(data, countByteOfBlock)
-
-	correctionBlock := make([][]byte, len(dataBlock))
-	for i, bytes := range dataBlock {
-		correctionBlock[i] = createByteCorrection(level, version-1, &bytes)
-	}
-
-	blocks := mergeBlocks(dataBlock, correctionBlock)
-
-	canvas, busyRangeModuls := generateInfoCanvas(version)
-	generatePreCode(blocks, &canvas, &busyRangeModuls)
-
-	lengthCanvas := len(canvas)
-	candidateCanvas := make([][]bool, lengthCanvas)
-	copy(candidateCanvas, canvas)
-	oldMask := byte(8)
-	printQR(&candidateCanvas)
-	//drawMask(&candidateCanvas, &busyRangeModuls, 8, 2)
-	//drawCodeMaskLevelCorrection(&candidateCanvas, level, 2)
-	//printQR(&candidateCanvas)
-	//drawMask(&candidateCanvas, &busyRangeModuls, 2, 8)
-	//drawCodeMaskLevelCorrection(&candidateCanvas, level, 8)
-	for i := 0; i < 8; i++ {
-		drawMask(&candidateCanvas, &busyRangeModuls, oldMask, byte(i))
-		drawCodeMaskLevelCorrection(&candidateCanvas, level, byte(i))
 		printQR(&candidateCanvas)
 		//drawCodeMaskLevelCorrection(&candidateCanvas, level, byte(i))
 		oldMask = byte(i)

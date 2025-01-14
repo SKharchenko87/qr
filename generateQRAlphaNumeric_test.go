@@ -27,24 +27,10 @@ func generateQR2(text string, level levelCorrection) [][]bool {
 	lengthCanvas := len(canvas)
 	candidateCanvas := make([][]bool, lengthCanvas)
 	copy(candidateCanvas, canvas)
-	//oldMask := byte(8)
-	//printQR(&candidateCanvas)
 	drawMask(&candidateCanvas, &busyRangeModuls, 8, 1)
 	drawCodeMaskLevelCorrection(&candidateCanvas, level, 1)
 	printQR(&candidateCanvas)
 
-	//for i := 0; i < 8; i++ {
-	//	drawMask(&candidateCanvas, &busyRangeModuls, oldMask, byte(i))
-	//	drawCodeMaskLevelCorrection(&candidateCanvas, level, byte(i))
-	//	printQR(&candidateCanvas)
-	//	//drawCodeMaskLevelCorrection(&candidateCanvas, level, byte(i))
-	//	oldMask = byte(i)
-	//}
-
-	//drawMask(&candidateCanvas, &busyRangeModuls, 8, 2)
-	//drawCodeMaskLevelCorrection(&candidateCanvas, level, 2)
-
-	// ToDo применить маску
 	return canvas
 }
 

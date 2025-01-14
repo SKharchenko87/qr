@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func generateQR(text string, level levelCorrection) [][]bool {
+func generateQR0(text string, level levelCorrection) [][]bool {
 	data, version := fillBinary([]byte(text), level)
 	fmt.Println(text)
 	fmt.Println(version)
@@ -22,35 +22,21 @@ func generateQR(text string, level levelCorrection) [][]bool {
 
 	blocks := mergeBlocks(dataBlock, correctionBlock)
 
-	canvas, busyRangeModuls := generateInfoCanvas(version)
-	generatePreCode(blocks, &canvas, &busyRangeModuls)
+	canvas, busyRangeModul := generateInfoCanvas(version)
+	generatePreCode(blocks, &canvas, &busyRangeModul)
 
 	lengthCanvas := len(canvas)
 	candidateCanvas := make([][]bool, lengthCanvas)
 	copy(candidateCanvas, canvas)
 
-	drawMask(&candidateCanvas, &busyRangeModuls, 8, 1)
+	drawMask(&candidateCanvas, &busyRangeModul, 8, 1)
 	drawCodeMaskLevelCorrection(&candidateCanvas, level, 1)
 	printQR(&candidateCanvas)
 
-	//oldMask := byte(8)
-	//printQR(&candidateCanvas)
-	//for i := 0; i < 8; i++ {
-	//	drawMask(&candidateCanvas, &busyRangeModuls, oldMask, byte(i))
-	//	drawCodeMaskLevelCorrection(&candidateCanvas, level, byte(i))
-	//	printQR(&candidateCanvas)
-	//	//drawCodeMaskLevelCorrection(&candidateCanvas, level, byte(i))
-	//	oldMask = byte(i)
-	//}
-
-	//drawMask(&candidateCanvas, &busyRangeModuls, 8, 2)
-	//drawCodeMaskLevelCorrection(&candidateCanvas, level, 2)
-
-	// ToDo применить маску
 	return canvas
 }
 
-func Test_generateQR(t *testing.T) {
+func Test_generateQR0(t *testing.T) {
 	type args struct {
 		text  string
 		level levelCorrection
@@ -382,19 +368,10 @@ func Test_generateQR(t *testing.T) {
 			{I, O, O, O, O, O, I, O, O, O, O, I, O, O, O, I, I, O, O, O, O},
 			{I, I, I, I, I, I, I, O, I, I, I, I, O, O, O, I, I, O, O, O, I},
 		}},
-
-		//{"Test a0123456789a012", args{"a0123456789a012", Medium}, [][]bool{}},
-		//{"Test a0123456789a0123", args{"a0123456789a0123", Medium}, [][]bool{}},
-		//{"Test a0123456789a01234", args{"a0123456789a01234", Medium}, [][]bool{}},
-		//{"Test a0123456789a012345", args{"a0123456789a012345", Medium}, [][]bool{}},
-		//{"Test a0123456789a0123456", args{"a0123456789a0123456", Medium}, [][]bool{}},
-		//{"Test a0123456789a01234567", args{"a0123456789a01234567", Medium}, [][]bool{}},
-		//{"Test a0123456789a012345678", args{"a0123456789a012345678", Medium}, [][]bool{}},
-		//{"Test a0123456789a0123456789", args{"a0123456789a0123456789", Medium}, [][]bool{}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := generateQR(tt.args.text, tt.args.level); !reflect.DeepEqual(got, tt.want) {
+			if got := generateQR0(tt.args.text, tt.args.level); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("generateQR2() = %v, want %v", got, tt.want)
 			}
 		})

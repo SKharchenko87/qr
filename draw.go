@@ -25,14 +25,14 @@ func drawSearchNode(canvas *[][]bool, i, j byte) {
 }
 
 // drawSearchNodes наносим на холст поисковые узоры
-func drawSearchNodes(canvas *[][]bool, busyRangeModuls *[]Rectangle) {
+func drawSearchNodes(canvas *[][]bool, busyRangeModul *[]Rectangle) {
 	drawSearchNode(canvas, 3, 3)
 	drawSearchNode(canvas, byte(len(*canvas)-4), 3)
 	drawSearchNode(canvas, 3, byte(len(*canvas)-4))
 	lengthCanvas := byte(len(*canvas))
-	*busyRangeModuls = append(*busyRangeModuls, Rectangle{0, 0, 8, 8})
-	*busyRangeModuls = append(*busyRangeModuls, Rectangle{0, lengthCanvas - 8, 8, lengthCanvas - 1})
-	*busyRangeModuls = append(*busyRangeModuls, Rectangle{lengthCanvas - 8, 0, lengthCanvas - 1, 8})
+	*busyRangeModul = append(*busyRangeModul, Rectangle{0, 0, 8, 8})
+	*busyRangeModul = append(*busyRangeModul, Rectangle{0, lengthCanvas - 8, 8, lengthCanvas - 1})
+	*busyRangeModul = append(*busyRangeModul, Rectangle{lengthCanvas - 8, 0, lengthCanvas - 1, 8})
 }
 
 // drawAlignmentNode наносим на холст выравнивающий узор
@@ -42,7 +42,7 @@ func drawAlignmentNode(canvas *[][]bool, i, j byte) {
 }
 
 // drawSearchNodes наносим на холст выравнивающие узоры
-func drawAlignmentNodes(canvas *[][]bool, version byte, busyRangeModuls *[]Rectangle) {
+func drawAlignmentNodes(canvas *[][]bool, version byte, busyRangeModul *[]Rectangle) {
 	locationAlignmentPatterns := LocationAlignmentPatterns[version]
 	lengthAlignmentPatterns := byte(len(locationAlignmentPatterns))
 	var i, j byte
@@ -54,25 +54,25 @@ func drawAlignmentNodes(canvas *[][]bool, version byte, busyRangeModuls *[]Recta
 				}
 			}
 			drawAlignmentNode(canvas, locationAlignmentPatterns[i], locationAlignmentPatterns[j])
-			*busyRangeModuls = append(*busyRangeModuls, Rectangle{locationAlignmentPatterns[i] - 2, locationAlignmentPatterns[j] - 2, locationAlignmentPatterns[i] + 2, locationAlignmentPatterns[j] + 2})
+			*busyRangeModul = append(*busyRangeModul, Rectangle{locationAlignmentPatterns[i] - 2, locationAlignmentPatterns[j] - 2, locationAlignmentPatterns[i] + 2, locationAlignmentPatterns[j] + 2})
 		}
 	}
 }
 
 // drawSynchronizationLine наносим на холст линии синхронизации
-func drawSynchronizationLines(canvas *[][]bool, busyRangeModuls *[]Rectangle) {
+func drawSynchronizationLines(canvas *[][]bool, busyRangeModul *[]Rectangle) {
 	y := 6
 	for x := 8; x < len(*canvas)-8; x += 2 {
 		(*canvas)[x][y] = I
 		(*canvas)[y][x] = I
 	}
 	lengthCanvas := byte(len(*canvas))
-	*busyRangeModuls = append(*busyRangeModuls, Rectangle{6, 0, 6, lengthCanvas - 1})
-	*busyRangeModuls = append(*busyRangeModuls, Rectangle{0, 6, lengthCanvas - 1, 6})
+	*busyRangeModul = append(*busyRangeModul, Rectangle{6, 0, 6, lengthCanvas - 1})
+	*busyRangeModul = append(*busyRangeModul, Rectangle{0, 6, lengthCanvas - 1, 6})
 }
 
 // drawCodeVersion наносим код версии
-func drawCodeVersion(canvas *[][]bool, version byte, busyRangeModuls *[]Rectangle) {
+func drawCodeVersion(canvas *[][]bool, version byte, busyRangeModul *[]Rectangle) {
 	if version > 6 {
 		lengthCanvas := byte(len(*canvas))
 		var i byte
@@ -83,8 +83,8 @@ func drawCodeVersion(canvas *[][]bool, version byte, busyRangeModuls *[]Rectangl
 				(*canvas)[j][i+lengthCanvas-11] = arr[i][j]
 			}
 		}
-		*busyRangeModuls = append(*busyRangeModuls, Rectangle{0, lengthCanvas - 11, 6, lengthCanvas - 9})
-		*busyRangeModuls = append(*busyRangeModuls, Rectangle{lengthCanvas - 11, 0, lengthCanvas - 9, 6})
+		*busyRangeModul = append(*busyRangeModul, Rectangle{0, lengthCanvas - 11, 6, lengthCanvas - 9})
+		*busyRangeModul = append(*busyRangeModul, Rectangle{lengthCanvas - 11, 0, lengthCanvas - 9, 6})
 	}
 }
 
@@ -101,14 +101,14 @@ func generateInfoCanvas(version byte) ([][]bool, []Rectangle) {
 		canvas[i] = make([]bool, lengthCanvas)
 	}
 
-	busyRangeModuls := []Rectangle{}
+	busyRangeModul := []Rectangle{}
 
-	drawSearchNodes(&canvas, &busyRangeModuls)
-	drawSynchronizationLines(&canvas, &busyRangeModuls)
-	drawAlignmentNodes(&canvas, version, &busyRangeModuls)
-	drawCodeVersion(&canvas, version, &busyRangeModuls)
+	drawSearchNodes(&canvas, &busyRangeModul)
+	drawSynchronizationLines(&canvas, &busyRangeModul)
+	drawAlignmentNodes(&canvas, version, &busyRangeModul)
+	drawCodeVersion(&canvas, version, &busyRangeModul)
 
-	return canvas, busyRangeModuls
+	return canvas, busyRangeModul
 }
 
 var bitMap = []byte{
@@ -122,8 +122,8 @@ var bitMap = []byte{
 	0b0000_0001,
 }
 
-func checkFree(busyRangeModuls *[]Rectangle, i, j byte) bool {
-	for _, rectangle := range *busyRangeModuls {
+func checkFree(busyRangeModul *[]Rectangle, i, j byte) bool {
+	for _, rectangle := range *busyRangeModul {
 		if rectangle.iLeftUp <= i && i <= rectangle.iRightDown &&
 			rectangle.jLeftUp <= j && j <= rectangle.jRightDown {
 			return false
@@ -132,7 +132,7 @@ func checkFree(busyRangeModuls *[]Rectangle, i, j byte) bool {
 	return true
 }
 
-func nextPosition(busyRangeModuls *[]Rectangle, i, j byte, lengthCanvas byte) (byte, byte) {
+func nextPosition(busyRangeModul *[]Rectangle, i, j byte, lengthCanvas byte) (byte, byte) {
 	var candidateI, candidateJ int
 	candidateI, candidateJ = int(i), int(j)
 	var flg bool = !(candidateI == 0 && candidateJ == 0)
@@ -159,13 +159,13 @@ func nextPosition(busyRangeModuls *[]Rectangle, i, j byte, lengthCanvas byte) (b
 			candidateI = int(lengthCanvas) - 1
 			candidateJ -= 2
 		}
-		flg = !checkFree(busyRangeModuls, byte(candidateI), byte(candidateJ))
+		flg = !checkFree(busyRangeModul, byte(candidateI), byte(candidateJ))
 	}
 	return byte(candidateI), byte(candidateJ)
 }
 
 // generatePreCode генерируем qr код без масок
-func generatePreCode(data []byte, canvas *[][]bool, busyRangeModuls *[]Rectangle) {
+func generatePreCode(data []byte, canvas *[][]bool, busyRangeModul *[]Rectangle) {
 	lengthCanvas := byte(len(*canvas))
 	i, j := lengthCanvas-1, lengthCanvas-1
 	for _, d := range data {
@@ -173,7 +173,7 @@ func generatePreCode(data []byte, canvas *[][]bool, busyRangeModuls *[]Rectangle
 			if d&b > 0 {
 				(*canvas)[i][j] = I
 			}
-			i, j = nextPosition(busyRangeModuls, i, j, lengthCanvas)
+			i, j = nextPosition(busyRangeModul, i, j, lengthCanvas)
 		}
 	}
 }
@@ -192,11 +192,9 @@ func drawCodeMaskLevelCorrection(canvas *[][]bool, level levelCorrection, mask b
 	var b bool
 	v := CodeMaskLevelCorrection[level][mask]
 	i0 := [][]int{
-		//{-3, 8}, {-4, 8}, {-5, 8}, {-6, 8}, {-7, 8}, {8, -8}, {8, -7}, {8, -6}, {8, -5}, {8, -4}, {8, -3}, {8, -2}, {8, -1}
 		{8, -1}, {8, -2}, {8, -3}, {8, -4}, {8, -5}, {8, -6}, {8, -7}, {8, -8}, {-7, 8}, {-6, 8}, {-5, 8}, {-4, 8}, {-3, 8},
 	}
 	i1 := [][]int{
-		//{8, 2}, {8, 3}, {8, 4}, {8, 5}, {8, 7}, {8, 8}, {7, 8}, {5, 8}, {4, 8}, {3, 8}, {2, 8}, {1, 8}, {0, 8},
 		{0, 8}, {1, 8}, {2, 8}, {3, 8}, {4, 8}, {5, 8}, {7, 8}, {8, 8}, {8, 7}, {8, 5}, {8, 4}, {8, 3}, {8, 2},
 	}
 	(*canvas)[lengthCanvas-8][8] = I
@@ -209,25 +207,18 @@ func drawCodeMaskLevelCorrection(canvas *[][]bool, level levelCorrection, mask b
 }
 
 // drawMask наносим на холст код маски и уровень коррекции
-func drawMask(canvas *[][]bool, busyRangeModuls *[]Rectangle, oldMask, newMask byte) {
+func drawMask(canvas *[][]bool, busyRangeModul *[]Rectangle, oldMask, newMask byte) {
 	lengthCanvas := byte(len(*canvas))
 	x, y := lengthCanvas-1, lengthCanvas-1
 	for x != 255 && y != 255 {
-		// ToDo
-		//fmt.Print(y, x, (*canvas)[y][x], " ")
 		if Masks[oldMask](x, y) == 0 && Masks[newMask](x, y) != 0 ||
 			Masks[oldMask](x, y) != 0 && Masks[newMask](x, y) == 0 {
 			(*canvas)[y][x] = !(*canvas)[y][x]
 		}
-		// ToDo
-		//fmt.Println((*canvas)[y][x])
-		y, x = nextPosition(busyRangeModuls, y, x, lengthCanvas)
+		y, x = nextPosition(busyRangeModul, y, x, lengthCanvas)
 	}
-	// ToDo
-	//printQR(canvas)
 }
 
-// ToDo
 func printQR(canvas *[][]bool) {
 	lengthCanvas := len(*canvas)
 	for i := 0; i < lengthCanvas; i++ {

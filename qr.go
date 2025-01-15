@@ -6,14 +6,14 @@ import (
 )
 
 // getVersion - получаем версию по кол-ву бит
-func getVersion(level levelCorrection, bitSizeData int) int {
+func getVersion(level LevelCorrection, bitSizeData int) int {
 	version, _ := slices.BinarySearch(levelToCountBits[level], bitSizeData)
 	return version + 1
 }
 
 // fillNumeric - преобразуем в срез байт входные данные в ЦИФРОВОЕ представление
 // // с добавлением информации о режиме кодирования и длине входных данных.
-func fillNumeric(data []byte, level levelCorrection) ([]byte, byte) {
+func fillNumeric(data []byte, level LevelCorrection) ([]byte, byte) {
 	l := len(data)
 	var bitSizeData int
 	if l%3 == 2 {
@@ -101,7 +101,7 @@ func fillNumeric(data []byte, level levelCorrection) ([]byte, byte) {
 
 // fillAlphanumeric - преобразуем в срез байт входные данные в БУКВЕННО-ЦИФРОВОЕ представление
 // с добавлением информации о режиме кодирования и длине входных данных.
-func fillAlphanumeric(data []byte, level levelCorrection) ([]byte, byte) {
+func fillAlphanumeric(data []byte, level LevelCorrection) ([]byte, byte) {
 	l := len(data)
 	var bitSizeData int
 	if l%2 == 1 {
@@ -185,7 +185,7 @@ func fillAlphanumeric(data []byte, level levelCorrection) ([]byte, byte) {
 // если количество бит в текущей последовательности байт меньше того,
 // которое нужно для выбранной версии, то оно дополнено чередующимися
 // байтами 11101100 и 00010001.
-func fillBinary(data []byte, level levelCorrection) ([]byte, byte) {
+func fillBinary(data []byte, level LevelCorrection) ([]byte, byte) {
 	l := len(data)
 	bitSizeData := l * 8
 	version, _ := slices.BinarySearch(levelToCountBits[level], bitSizeData)
@@ -227,7 +227,7 @@ func fillBinary(data []byte, level levelCorrection) ([]byte, byte) {
 // ToDo fillKanji
 
 // Разделение информации на блоки - Определение количество байт в каждом блоке
-func getCountByteOfBlock(level levelCorrection, version byte) []int {
+func getCountByteOfBlock(level LevelCorrection, version byte) []int {
 	bytesData := levelToCountBits[level][version] / 8
 	byteOfBlock := bytesData / CountOfBlocks[level][version]
 	reminderByteOfBlock := bytesData % CountOfBlocks[level][version]
@@ -261,7 +261,7 @@ func fillBlocks(data []byte, countByteOfBlock []int) [][]byte {
 }
 
 // createByteCorrection Создание байтов коррекции
-func createByteCorrection(level levelCorrection, version byte, data *[]byte) []byte {
+func createByteCorrection(level LevelCorrection, version byte, data *[]byte) []byte {
 	l := len(*data)
 	lengthCorrectionBytes := NumberOfCorrectionBytesPerBlock[level][version] // lengthCorrectionBytes - Количество байтов коррекции на один блок.
 	polynomials := GeneratePolynomial[lengthCorrectionBytes]                 // polynomials - Генерирующие многочлены.
@@ -319,7 +319,7 @@ func mergeBlocks(data, correction [][]byte) []byte {
 }
 
 // Определение оптимальный тип текста для формирования представления
-func getKind(text string) func(data []byte, level levelCorrection) ([]byte, byte) {
+func getKind(text string) func(data []byte, level LevelCorrection) ([]byte, byte) {
 	res := digital
 	for i := 0; i < len(text); i++ {
 		b := text[i]
@@ -339,7 +339,7 @@ func getKind(text string) func(data []byte, level levelCorrection) ([]byte, byte
 	return fillNumeric
 }
 
-func GenerateQR(text string, level levelCorrection) [][]bool {
+func GenerateQR(text string, level LevelCorrection) [][]bool {
 	f := getKind(text)
 	data, version := f([]byte(text), level)
 

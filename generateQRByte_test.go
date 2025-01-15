@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func generateQR0(text string, level levelCorrection) [][]bool {
+func generateQR0(text string, level LevelCorrection) [][]bool {
 	data, version := fillBinary([]byte(text), level)
 	fmt.Println(text)
 	fmt.Println(version)
@@ -39,7 +39,7 @@ func generateQR0(text string, level levelCorrection) [][]bool {
 func Test_generateQR0(t *testing.T) {
 	type args struct {
 		text  string
-		level levelCorrection
+		level LevelCorrection
 	}
 	tests := []struct {
 		name string
@@ -381,7 +381,7 @@ func Test_generateQR0(t *testing.T) {
 func Test_fillBinary(t *testing.T) {
 	type args struct {
 		data  []byte
-		level levelCorrection
+		level LevelCorrection
 	}
 	tests := []struct {
 		name  string

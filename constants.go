@@ -8,12 +8,12 @@ var alphanumericDictionary = map[byte]int16{
 	' ': 36, '$': 37, '%': 38, '*': 39, '+': 40, '-': 41, '.': 42, '/': 43, ',': 44,
 }
 
-// levelCorrection - уровень коррекции
-type levelCorrection byte
+// LevelCorrection - уровень коррекции
+type LevelCorrection byte
 
 const (
 	// High - Допустимо максимум 30% повреждений
-	High levelCorrection = iota
+	High LevelCorrection = iota
 
 	// Quality - Допустимо максимум 25% повреждений
 	Quality
@@ -27,7 +27,7 @@ const (
 
 // Максимальное количество информации в битах.
 var (
-	levelToCountBits = map[levelCorrection][]int{
+	levelToCountBits = map[LevelCorrection][]int{
 		Low: {
 			152, 272, 440, 640, 864, 1088, 1248, 1552, 1856, 2192,
 			2592, 2960, 3424, 3688, 4184, 4712, 5176, 5768, 6360, 6888,
@@ -102,7 +102,7 @@ func lengthFieldData(version int, kind kindEncode) int {
 
 // CountOfBlocks Разделение информации на блоки
 var (
-	CountOfBlocks = map[levelCorrection][]int{
+	CountOfBlocks = map[LevelCorrection][]int{
 		Low: {
 			1, 1, 1, 1, 1, 2, 2, 2, 2, 4,
 			4, 4, 4, 4, 6, 6, 6, 6, 7, 8,
@@ -133,7 +133,7 @@ var (
 // NumberOfCorrectionBytesPerBlock Количество байтов коррекции на один блок
 
 var (
-	NumberOfCorrectionBytesPerBlock = map[levelCorrection][]byte{
+	NumberOfCorrectionBytesPerBlock = map[LevelCorrection][]byte{
 		Low: {
 			7, 10, 15, 20, 26, 18, 20, 24, 30, 18,
 			20, 24, 26, 30, 22, 24, 28, 30, 28, 28,
@@ -255,7 +255,7 @@ var (
 
 // CodeMaskLevelCorrection Коды маски и уровня коррекции.
 var (
-	CodeMaskLevelCorrection = map[levelCorrection][]uint16{
+	CodeMaskLevelCorrection = map[LevelCorrection][]uint16{
 		Low: {
 			0b0001_0111_1100_0100,
 			0b0001_0010_1111_0011,

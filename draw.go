@@ -179,7 +179,7 @@ func generatePreCode(data []byte, canvas *[][]bool, busyRangeModul *[]Rectangle)
 }
 
 // drawCodeMaskLevelCorrection наносим на холст код маски и уровень коррекции
-func drawCodeMaskLevelCorrection(canvas *[][]bool, level levelCorrection, mask byte) {
+func drawCodeMaskLevelCorrection(canvas *[][]bool, level LevelCorrection, mask byte) {
 	lengthCanvas := len(*canvas)
 	//LevelCorrection
 	(*canvas)[8][0] = (level>>1)&1 == 1

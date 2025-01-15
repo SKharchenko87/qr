@@ -8,7 +8,7 @@ import (
 
 func Test_getCountByteOfBlock(t *testing.T) {
 	type args struct {
-		level   levelCorrection
+		level   LevelCorrection
 		version byte
 	}
 	tests := []struct {
@@ -29,7 +29,7 @@ func Test_getCountByteOfBlock(t *testing.T) {
 
 func Test_createByteCorrection(t *testing.T) {
 	type args struct {
-		level   levelCorrection
+		level   LevelCorrection
 		version byte
 		data    *[]byte
 	}
@@ -73,7 +73,7 @@ func Test_mergeBlocks(t *testing.T) {
 func Test_fill(t *testing.T) {
 	type args struct {
 		data  []byte
-		level levelCorrection
+		level LevelCorrection
 	}
 	tests := []struct {
 		name  string
@@ -103,7 +103,7 @@ func Test_getKind(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want func(data []byte, level levelCorrection) ([]byte, byte)
+		want func(data []byte, level LevelCorrection) ([]byte, byte)
 	}{
 		{"Test 1", args{"0123456789"}, fillNumeric},
 		{"Test 2", args{"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./"}, fillAlphanumeric},
@@ -121,7 +121,7 @@ func Test_getKind(t *testing.T) {
 func Test_generateQR(t *testing.T) {
 	type args struct {
 		text  string
-		level levelCorrection
+		level LevelCorrection
 	}
 	tests := []struct {
 		name string

@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func generateQR2(text string, level levelCorrection) [][]bool {
+func generateQR2(text string, level LevelCorrection) [][]bool {
 	data, version := fillAlphanumeric([]byte(text), level)
 	fmt.Println(version)
 	fmt.Println(data)
@@ -37,7 +37,7 @@ func generateQR2(text string, level levelCorrection) [][]bool {
 func Test_generateQR2(t *testing.T) {
 	type args struct {
 		text  string
-		level levelCorrection
+		level LevelCorrection
 	}
 	tests := []struct {
 		name string
@@ -571,7 +571,7 @@ func Test_generateQR2(t *testing.T) {
 func Test_fillAlphanumeric(t *testing.T) {
 	type args struct {
 		data  []byte
-		level levelCorrection
+		level LevelCorrection
 	}
 	tests := []struct {
 		name  string

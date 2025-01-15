@@ -220,8 +220,8 @@ func Test_generateQR(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := generateQR(tt.args.text, tt.args.level); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("generateQR() = %v, want %v", got, tt.want)
+			if got := GenerateQR(tt.args.text, tt.args.level); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("GenerateQR() = %v, want %v", got, tt.want)
 			}
 		})
 	}

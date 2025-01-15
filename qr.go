@@ -339,7 +339,7 @@ func getKind(text string) func(data []byte, level levelCorrection) ([]byte, byte
 	return fillNumeric
 }
 
-func generateQR(text string, level levelCorrection) [][]bool {
+func GenerateQR(text string, level levelCorrection) [][]bool {
 	f := getKind(text)
 	data, version := f([]byte(text), level)
 
